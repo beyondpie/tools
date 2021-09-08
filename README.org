@@ -32,7 +32,7 @@
    Conda is widely used to control vitural enviroment in Python. But
    it's actually a general package management and vitural enviroment
    tool. It works in R, though seems to be a little slow when
-   configuring the R related configs.
+   configuring the R related dependencies.
 
    - Add R related conda channels
 #+BEGIN_SRC R
