@@ -1,0 +1,60 @@
+* use_R_strictly
+
+  R is easy to use at first. I use it a lot, but begin to hate it a
+  little bit when I use Python. The reason is simple: it's not precise
+  from a programmer view.
+  - The error information often points to the wrong places and not
+    helpfull at all.
+  - When I use `library("some package")`, the function names will
+    pollute the whole namespace. When reading the codes, it's really
+    hard to know where this function comes from at a first glance.
+    I indeed miss the `import` in Python, which is simple but precise.
+  - It lacks of a simple module system. When I write some utilities in
+    a script, I can only use `source("the name of the script")` to add
+    it to another script, which again pollute the namespace in my
+    current workspace.
+
+  But R indeed has lots of great features I love:
+  - The data structures: list, data.matrix, matrix, vector, factor and
+    so on. They are just easy to use, and supporved by lots of usefull
+    functions. Pandas in python is good but not that good as the data
+    structures in R.
+  - R graphic tools!
+  - Writing R packages is easy and the generated document is great!
+  - Lots of statisical tools in R. They are professonal!
+  
+
+  In this repository, I will summarize my experience on using R
+  strictly.
+
+** Use conda to control the virtual enviroment in R.
+
+   Conda is widely used to control vitural enviroment in Python. But
+   it's actually a general package management and vitural enviroment
+   tool. It works in R, though seems to be a little slow when
+   configuring the R related configs.
+
+   - Add R related conda channels
+#+BEING_SRC R
+## Like a stack, the channels will be search in order of conda-forge,
+## biconda, then defaults.
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+#+END_SRC
+
+   - Create a virtual enviorment in R
+     `conda create -n name_of_env r-base r-essentials`
+
+   - Most of the popular packages can be installed directly by conda
+     [RECOMMEND]. But we can use R to install packages. Just to know
+     that, R will search the packages with R installed or some where
+     you define with `R_LIBS_USER` then the conda's.
+
+   - REF: the [[https://community.rstudio.com/t/why-not-r-via-conda/9438][document]] helps me a lot.
+
+** Use the package box as a module system in R.
+
+[[https://github.com/klmr/box][box]] is just like the support of python module system in R. It's easy
+to use.
+   
