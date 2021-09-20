@@ -15,7 +15,7 @@
     current workspace.
 
   But R indeed has lots of great features I love:
-  - The data structures: list, data.matrix, matrix, vector, factor and
+  - The data structures: list, data.frame, matrix, vector, factor and
     so on. They are just easy to use, and supporved by lots of usefull
     functions. Pandas in python is good but not that good as the data
     structures in R.
@@ -32,10 +32,10 @@
    Conda is widely used to control vitural enviroment in Python. But
    it's actually a general package management and vitural enviroment
    tool. It works in R, though seems to be a little slow when
-   configuring the R related configs.
+   configuring the R related dependencies.
 
    - Add R related conda channels
-#+BEING_SRC R
+#+BEGIN_SRC R
 ## Like a stack, the channels will be search in order of conda-forge,
 ## biconda, then defaults.
 conda config --add channels defaults
