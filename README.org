@@ -4,7 +4,7 @@
   little bit when I use Python. The reason is simple: it's not precise
   from a programmer view.
   - The error information often points to the wrong places and not
-    helpfull at all.
+    helpfull at all. `traceback()` helps sometimes, but still not enough.
   - When I use `library("some package")`, the function names will
     pollute the whole namespace. When reading the codes, it's really
     hard to know where this function comes from at a first glance.
@@ -54,7 +54,12 @@ conda config --add channels conda-forge
    - REF: the [[https://community.rstudio.com/t/why-not-r-via-conda/9438][document]] helps me a lot.
 
 ** Use the package box as a module system in R.
+A module system is to help us to control our namespace. It helps us to
+name the variables easilily without mixing them from other
+libariries. More importantly, it makes the code much easier to
+read.
 
-[[https://github.com/klmr/box][box]] is just like the support of python module system in R. It's easy
-to use.
    
+- [[https://github.com/klmr/box][box]] is is a module system in R, which is just like the one in
+  Python. Previously it's named as klmr/modules, and is not updated
+  now. The author upgrade the framework, and now box is is the one we need.
