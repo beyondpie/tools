@@ -86,6 +86,21 @@ other chapters when necessary.
   =gdb= in C/C++. See [[https://adv-r.hadley.nz/debugging.html][Chapter 22 Debugging]] in  [[https://adv-r.hadley.nz][Advanced R]] by Hadley
   Wickham for the details.
 
+** Tips
+- Use LESS =library= to load packages, instead use =package::function=
+  to declare explictly which function in use.
+  - =library= will load the package, but make our current global
+    enviroment dirty with the names from that package. See
+    [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
+
+- NOT use dot when naming variables, such as =data.i=. Perfer underline
+  instead.
+  - It's legal to 
+    name variables like this in R unlike other languages. But this may
+    confuse people since it usually means you want to get an attribute
+    named /i/ in the variable =data= for most of the languges
+    besides R, and also R's generics functions use dot to find the real
+    functions. 
 ** Other packages
 - [[https://github.com/trevorld/r-argparse][r-argparse]] or [[https://github.com/trevorld/r-optparse][r-optparse]]
   - Just like Python argparse library, which is used to add diverse
@@ -109,21 +124,6 @@ other chapters when necessary.
 - [[https://github.com/r-lib/withr/][withr]]
   - Allow us to temporarily change the global states.
 
-** Tips
-- Use LESS =library= to load packages, instead use =package::function=
-  to declare explictly which function in use.
-  - =library= will load the package, but make our current global
-    enviroment dirty with the names from that package. See
-    [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
-
-- NOT use dot when naming variables, such as =data.i=. Perfer underline
-  instead.
-  - It's legal to 
-    name variables like this in R unlike other languages. But this may
-    confuse people since it usually means you want to get an attribute
-    named /i/ in the variable =data= for most of the languges
-    besides R, and also R's generics functions use dot to find the real
-    functions. 
 ** Materials
 - [[https://adv-r.hadley.nz][Advanced R]] by Hadley Wickham.
   - It's free and updated online. This book is written very well, and
