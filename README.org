@@ -61,7 +61,30 @@ read.
    
 - [[https://github.com/klmr/box][box]] is is a module system in R, which is just like the one in
   Python. Previously it's named as klmr/modules, and is not updated
-  now. The author upgrade the framework, and now box is is the one we need.
+  now. The author upgrade the framework, and now box is is the one we
+  need.
+
+** Writing R packages
+It's easy to write R packages. The book [[https://adv-r.hadley.nz][R Packages]] by Hdley Wickham is
+the only book in need. It's short and provides lots of practical
+tools. Chapter 2 is enough to start to write a package, and then read
+other chapters when necessary.
+
+- [[https://github.com/r-lib/devtools][devtools]] is the tool I use to organize R packages. One important
+  function is `devtools::load_all()`, which is key to debug our
+  packages. See Chapter 5 in the book above.
+
+** Debug R
+- When you have errors, use `traceback()` to view more information
+  about them.
+- Add `print` related sentences, which is common and easy to
+  use. Simple logs help a lot
+- `debug([your_function])`. I use this a lot since we can go to the
+  details of how the commands run by investigating each command, and
+  the current generated/updated variables in the debugging
+  envioroment. This is provided by R, and much like `pdb` in Python or
+  `gdb` in C/C++. See [[https://adv-r.hadley.nz/debugging.html][Chapter 22 Debugging]] in  [[https://adv-r.hadley.nz][Advanced R]] by Hadley
+  Wickham for the details.
 
 ** Other packages
 - [[https://github.com/r-lib/here/][here]]
