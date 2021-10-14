@@ -4,13 +4,13 @@
   little bit when I use Python. The reason is simple: it's not precise
   from a programmer view.
   - The error information often points to the wrong places and not
-    helpfull at all. `traceback()` helps sometimes, but still not enough.
-  - When I use `library("some package")`, the function names will
+    helpfull at all. =traceback()= helps sometimes, but still not enough.
+  - When I use =library("some package")=, the function names will
     pollute the whole namespace. When reading the codes, it's really
     hard to know where this function comes from at a first glance.
-    I indeed miss the `import` in Python, which is simple but precise.
+    I indeed miss the =import= in Python, which is simple but precise.
   - It lacks of a simple module system. When I write some utilities in
-    a script, I can only use `source("the name of the script")` to add
+    a script, I can only use =source("the name of the script")= to add
     it to another script, which again pollute the namespace in my
     current workspace.
 
@@ -44,12 +44,12 @@ conda config --add channels conda-forge
 #+END_SRC
 
    - Create a virtual enviorment in R
-     `conda create -n name_of_env r-base r-essentials`
+     =conda create -n name_of_env r-base r-essentials=
 
    - Most of the popular packages can be installed directly by conda
      [RECOMMEND]. But we can use R to install packages. Just to know
      that, R will search the packages with R installed or some where
-     you define with `R_LIBS_USER` then the conda's.
+     you define with =R_LIBS_USER= then the conda's.
 
    - REF: the [[https://community.rstudio.com/t/why-not-r-via-conda/9438][document]] helps me a lot.
 
@@ -71,19 +71,19 @@ tools. Chapter 2 is enough to start to write a package, and then read
 other chapters when necessary.
 
 - [[https://github.com/r-lib/devtools][devtools]] is the tool I use to organize R packages. One important
-  function is `devtools::load_all()`, which is key to debug our
+  function is =devtools::load_all()=, which is key to debug our
   packages. See Chapter 5 in the book above.
 
 ** Debug R
-- When you have errors, use `traceback()` to view more information
+- When you have errors, use =traceback()= to view more information
   about them.
-- Add `print` related sentences, which is common and easy to
+- Add =print= related sentences, which is common and easy to
   use. Simple logs help a lot
-- `debug([your_function])`. I use this a lot since we can go to the
+- =debug([your_function])=. I use this a lot since we can go to the
   details of how the commands run by investigating each command, and
   the current generated/updated variables in the debugging
-  envioroment. This is provided by R, and much like `pdb` in Python or
-  `gdb` in C/C++. See [[https://adv-r.hadley.nz/debugging.html][Chapter 22 Debugging]] in  [[https://adv-r.hadley.nz][Advanced R]] by Hadley
+  envioroment. This is provided by R, and much like =pdb= in Python or
+  =gdb= in C/C++. See [[https://adv-r.hadley.nz/debugging.html][Chapter 22 Debugging]] in  [[https://adv-r.hadley.nz][Advanced R]] by Hadley
   Wickham for the details.
 
 ** Other packages
@@ -95,7 +95,7 @@ other chapters when necessary.
 - [[https://github.com/rticulate/import/][import]]
   - Like Python import mechanism, this packages allows us to load
     specific R function from a package or a script. Currently, I use
-    `::` or `box` package more often than this.
+    =::= or =box= package more often than this.
 - [[https://github.com/r-lib/here/][here]]
   - It is used to locate the project root path. It's a good habit to
     use it in R scripts since we don't need to specify the 
@@ -110,9 +110,9 @@ other chapters when necessary.
   - Allow us to temporarily change the global states.
 
 ** Tips
-- Use LESS `library` to load packages, instead use `package::function`
+- Use LESS =library= to load packages, instead use =package::function=
   to declare explictly which function in use.
-  - `library` will load the package, but make our current global
+  - =library= will load the package, but make our current global
     enviroment dirty with the names from that package. See
     [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
 
@@ -120,7 +120,7 @@ other chapters when necessary.
   instead. It's legal to 
   name variables like this in R unlike other languages. But this may
   confuse people since it usually means you want to get an attribute
-  named /i/ in the variable ```data``` for most of the languges
+  named /i/ in the variable =data= for most of the languges
   besides R, and also R's generics functions use dot to find the real
   functions. 
 ** Materials
