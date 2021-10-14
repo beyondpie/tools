@@ -116,7 +116,7 @@ other chapters when necessary.
     enviroment dirty with the names from that package. See
     [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
 
-- NOT use dot when naming variables, such as data.i. Perfer underline
+- NOT use dot when naming variables, such as =data.i=. Perfer underline
   instead.
   - It's legal to 
     name variables like this in R unlike other languages. But this may
