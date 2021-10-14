@@ -21,7 +21,7 @@
     structures in R.
   - R graphic tools!
   - Writing R packages is easy and the generated document is great!
-  - Lots of statisical tools in R. They are professonal!
+  - Lots of professional statistical packages.
   
 
   In this repository, I will summarize my experience on using R
@@ -115,6 +115,14 @@ other chapters when necessary.
   - `library` will load the package, but make our current global
     enviroment dirty with the names from that package. See
     [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
+
+- NOT use dot when naming variables, such as data.i. Perfer underline
+  instead. It's legal to 
+  name variables like this in R unlike other languages. But this may
+  confuse people since it usually means you want to get an attribute
+  named /i/ in the variable ```data``` for most of the languges
+  besides R, and also R's generics functions use dot to find the real
+  functions. 
 ** Materials
 - [[https://adv-r.hadley.nz][Advanced R]] by Hadley Wickham.
   - It's free and updated online. This book is written very well, and
