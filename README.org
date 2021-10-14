@@ -87,6 +87,15 @@ other chapters when necessary.
   Wickham for the details.
 
 ** Other packages
+- [[https://github.com/trevorld/r-argparse][r-argparse]] or [[https://github.com/trevorld/r-optparse][r-optparse]]
+  - Just like Python argparse library, which is used to add diverse
+    arguments for a R script. Commenly used when the R script needs
+    extra parameters/arguments.
+
+- [[https://github.com/rticulate/import/][import]]
+  - Like Python import mechanism, this packages allows us to load
+    specific R function from a package or a script. Currently, I use
+    `::` or `box` package more often than this.
 - [[https://github.com/r-lib/here/][here]]
   - It is used to locate the project root path. It's a good
   habit to use it in R scripts since we don't need to specify the
@@ -99,6 +108,13 @@ other chapters when necessary.
 
 - [[https://github.com/r-lib/withr/][withr]]
   - Allow us to temporarily change the global states.
+
+** Tips
+- Use LESS `library` to load packages, instead use `package::function`
+  to declare explictly which function in use.
+  - `library` will load the package, but make our current global
+    enviroment dirty with the names from that package. See
+    [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
 ** Materials
 - [[https://adv-r.hadley.nz][Advanced R]] by Hadley Wickham.
   - It's free and updated online. This book is written very well, and
