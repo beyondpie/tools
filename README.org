@@ -97,10 +97,10 @@ other chapters when necessary.
     specific R function from a package or a script. Currently, I use
     `::` or `box` package more often than this.
 - [[https://github.com/r-lib/here/][here]]
-  - It is used to locate the project root path. It's a good
-  habit to use it in R scripts since we don't need to specify the
-  workspace directory specifically. This increases the robust of our
-  codes. Another similar package named [[https://github.com/r-lib/rprojroot/][rprojroot]].
+  - It is used to locate the project root path. It's a good habit to
+    use it in R scripts since we don't need to specify the 
+    workspace directory specifically. This increases the robust of our
+    codes. Another similar package named [[https://github.com/r-lib/rprojroot/][rprojroot]].
 
 - [[https://github.com/rstudio/renv/][renv]]
   - Create reproducible environment for each project by creating an
