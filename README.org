@@ -117,12 +117,13 @@ other chapters when necessary.
     [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
 
 - NOT use dot when naming variables, such as data.i. Perfer underline
-  instead. It's legal to 
-  name variables like this in R unlike other languages. But this may
-  confuse people since it usually means you want to get an attribute
-  named /i/ in the variable =data= for most of the languges
-  besides R, and also R's generics functions use dot to find the real
-  functions. 
+  instead.
+  - It's legal to 
+    name variables like this in R unlike other languages. But this may
+    confuse people since it usually means you want to get an attribute
+    named /i/ in the variable =data= for most of the languges
+    besides R, and also R's generics functions use dot to find the real
+    functions. 
 ** Materials
 - [[https://adv-r.hadley.nz][Advanced R]] by Hadley Wickham.
   - It's free and updated online. This book is written very well, and
