@@ -58,8 +58,30 @@ A module system is to help us to control our namespace. It helps us to
 name the variables easilily without mixing them from other
 libariries. More importantly, it makes the code much easier to
 read.
-
    
 - [[https://github.com/klmr/box][box]] is is a module system in R, which is just like the one in
   Python. Previously it's named as klmr/modules, and is not updated
   now. The author upgrade the framework, and now box is is the one we need.
+
+** Other packages
+- [[https://github.com/r-lib/here/][here]]
+  - It is used to locate the project root path. It's a good
+  habit to use it in R scripts since we don't need to specify the
+  workspace directory specifically. This increases the robust of our
+  codes. Another similar package named [[https://github.com/r-lib/rprojroot/][rprojroot]].
+
+- [[https://github.com/rstudio/renv/][renv]]
+  - Create reproducible environment for each project by creating an
+    independent programming environment like conda.
+
+- [[https://github.com/r-lib/withr/][withr]]
+  - Allow us to temporarily change the global states.
+** Materials
+- [[https://adv-r.hadley.nz][Advanced R]] by Hadley Wickham.
+  - It's free and updated online. This book is written very well, and
+    covers lots of important and advanced topics in R. I learn a lot
+    about the concept of R enviroments and the object-oriented
+    programming, like S3, S4, and R6.
+    
+- [[https://adv-r.hadley.nz][R Packages]] by Hdley Wickham.
+  - It's free and updated online. This is the one for writing R packages.
