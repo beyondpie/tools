@@ -87,20 +87,27 @@ other chapters when necessary.
   Wickham for the details.
 
 ** Tips
-- Use LESS =library= to load packages, instead use =package::function=
-  to declare explictly which function in use.
-  - =library= will load the package, but make our current global
-    enviroment dirty with the names from that package. See
-    [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
+   - Use LESS =library= to load packages, instead use =package::function=
+     to declare explictly which function in use.
+     - =library= will load the package, but make our current global
+       enviroment dirty with the names from that package. See
+       [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
 
-- NOT use dot when naming variables, such as =data.i=. Perfer underline
-  instead.
-  - It's legal to 
-    name variables like this in R unlike other languages. But this may
-    confuse people since it usually means you want to get an attribute
-    named /i/ in the variable =data= for most of the languges
-    besides R, and also R's generics functions use dot to find the real
-    functions. 
+   - NOT use dot when naming variables, such as =data.i=. Perfer underline
+     instead.
+     - It's legal to 
+       name variables like this in R unlike other languages. But this may
+       confuse people since it usually means you want to get an attribute
+       named /i/ in the variable =data= for most of the languges
+       besides R, and also R's generics functions use dot to find the real
+       functions.
+   - When use =install.packages=, sometimes I face =ERROR: failed to
+     create lock directory= problem. We can use
+     =install.packages("[packagenm]", dependencies=TRUE, INSTALL_ops =
+     '--no-lock')=. See [[https://stackoverflow.com/questions/14382209/r-install-packages-returns-failed-to-create-lock-directory][ref]] for more details.
+   - Use =dependencies=TRUE= to install packages if facing some
+     depencies erros.
+
 ** Other packages
 - [[https://github.com/trevorld/r-argparse][r-argparse]] or [[https://github.com/trevorld/r-optparse][r-optparse]]
   - Just like Python argparse library, which is used to add diverse
