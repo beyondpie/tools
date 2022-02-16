@@ -138,5 +138,19 @@ other chapters when necessary.
     about the concept of R enviroments and the object-oriented
     programming, like S3, S4, and R6.
     
-- [[https://adv-r.hadley.nz][R Packages]] by Hdley Wickham.
+- [[https://adv-r.hadley.nz][R Packages]] by Hadley Wickham.
   - It's free and updated online. This is the one for writing R packages.
+
+- [[https://www.stat.auckland.ac.nz/~paul/RG2e/][R Graphics]] by Paul Murrell
+  - This book introcudes in deep the graphic system in R, inlcuding one of the
+    base system named =grid=, which both =ggplot2= and =lattice= are
+    build upon and another base system used by default R plot.
+
+- [[https://ggplot2-book.org][ggplot2]] by Hadley Wickham
+  - This book introduces how to use ggplot2 in depth, such as the
+    major components in ggplot2 and how to hack it.
+
+
+** Resources
+   - [[https://bookdown.org][bookdown website]]: lots of high-quality books about R there. More
+     importantly, they are free and public.
