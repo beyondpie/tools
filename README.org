@@ -57,13 +57,8 @@ conda config --add channels conda-forge
 A module system is to help us to control our namespace. It helps us to
 name the variables easilily without mixing them from other
 libariries. More importantly, it makes the code much easier to
-read.
+read. 
    
-- [[https://github.com/klmr/box][box]] is is a module system in R, which is just like the one in
-  Python. Previously it's named as klmr/modules, and is not updated
-  now. The author upgrade the framework, and now box is is the one we
-  need.
-
 ** Writing R packages
 It's easy to write R packages. The book [[https://adv-r.hadley.nz][R Packages]] by Hdley Wickham is
 the only book in need. It's short and provides lots of practical
@@ -92,15 +87,7 @@ other chapters when necessary.
      - =library= will load the package, but make our current global
        enviroment dirty with the names from that package. See
        [[https://adv-r.hadley.nz/environments.html#special-environments][Special Env]] for more details.
-
-   - NOT use dot when naming variables, such as =data.i=. Perfer underline
-     instead.
-     - It's legal to 
-       name variables like this in R unlike other languages. But this may
-       confuse people since it usually means you want to get an attribute
-       named /i/ in the variable =data= for most of the languges
-       besides R, and also R's generics functions use dot to find the real
-       functions.
+       
    - When use =install.packages=, sometimes I face =ERROR: failed to
      create lock directory= problem. We can use
      =install.packages("[packagenm]", dependencies=TRUE, INSTALL_ops =
@@ -130,6 +117,11 @@ other chapters when necessary.
 
 - [[https://github.com/r-lib/withr/][withr]]
   - Allow us to temporarily change the global states.
+  
+- [[https://github.com/klmr/box][box]] is is a module system in R, which is just like the one in
+  Python. Previously it's named as klmr/modules, and is not updated
+  now. The author upgrade the framework, and now box is is the one we
+  need.
 
 ** Materials
 - [[https://adv-r.hadley.nz][Advanced R]] by Hadley Wickham.
@@ -149,7 +141,6 @@ other chapters when necessary.
 - [[https://ggplot2-book.org][ggplot2]] by Hadley Wickham
   - This book introduces how to use ggplot2 in depth, such as the
     major components in ggplot2 and how to hack it.
-
 
 ** Resources
    - [[https://bookdown.org][bookdown website]]: lots of high-quality books about R there. More
