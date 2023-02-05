@@ -36,11 +36,13 @@
 
    - Add R related conda channels
 #+BEGIN_SRC R
-## Like a stack, the channels will be search in order of conda-forge,
-## biconda, then defaults.
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
+  ## Like a stack, the channels will be search in order of conda-forge,
+  ## biconda, then defaults.
+  conda config --add channels defaults
+  conda config --add channels bioconda
+  ## conda-forge is maintained by the community, and packages from
+  ## it can be treated as high-quality ones.
+  conda config --add channels conda-forge
 #+END_SRC
 
    - Create a virtual enviorment in R
@@ -50,10 +52,12 @@ conda config --add channels conda-forge
      [RECOMMEND]. But we can use R to install packages. Just to know
      that, R will search the packages with R installed or some where
      you define with =R_LIBS_USER= then the conda's.
+     
+   - [IMPORTANT]: a package installed by conda should not be updated in R.
 
    - REF: the [[https://community.rstudio.com/t/why-not-r-via-conda/9438][document]] helps me a lot.
 
-** Use the package box as a module system in R.
+** Use the package _import_ by Rstudio as a module system in R.
 A module system is to help us to control our namespace. It helps us to
 name the variables easilily without mixing them from other
 libariries. More importantly, it makes the code much easier to
