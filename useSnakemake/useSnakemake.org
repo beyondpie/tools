@@ -55,13 +55,30 @@ The aims for this page:
 - named with *dm1*
 - specific ones for data-intensive works, like copy big data.
 - No needs to submit jobs, just run your commands.
+*** Storage
+- OASIS: 800+ TB Data Oasis Lustre-based high performance parallel
+  file system
+  - Each use has 25TB space.
+  - 90-day purge policy
+  - Use =touch [your file]= to update the file timestamp
+  - Use =find . -exec touch {} \;= to update the files in current
+    directories.
+- HOME: =~=, 100 GB per user
+- PROJECT: condo storage we buy
+  - Typically 300 TB shared by all the users in our lab
+  - use =df -h [project dir]= to check the space information
 ** Queue: assign a queue when you submitting a job
-
-** SU: how we pay to TSCC
-*** 1 SU: 1 core * 1 hour
-- core resources will be calculated once we submit jobs
-- time resources will be re-estimated based on how long we acutally use
-*** 1 SU ~ $0.025
+- hotel
+** [[https://www.sdsc.edu/services/hpc/tscc/hotel_details.html][SU]]: how we pay to TSCC
+- 1 SU: 1 core * 1 hour
+  - core resources will be calculated once we submit jobs
+  - time resources will be re-estimated based on how long we acutally
+    use
+- $250 (10K SUs): 1 SU ~ $0.025
+- =gbalance -u [user name]= to check the money left
+  - add one line ~alias mymoney="gbalance -u [user name]"~ into your
+    =~/.bashrc= file and ~source ~/.bashrc~. Then use ~mymoney~ to
+    check your status.
 * Submit jobs in TSCC
 ** P
 * Snakemake
