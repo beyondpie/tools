@@ -20,23 +20,27 @@ The aims for this page:
 * Introduction
 ** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
 *** Login nodes:
-    - when you enter tscc using SSH, you are assigned to these nodes
-    - *SSH Keys*: fast access without password
-      - like how we set github SSH Keys
-      - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
-#+BEING_SRC ssh
-Host *
-ControlMaster auto
-ServerAliveInterval 5
-ServerAliveCountMax 2
-ControlPath ~/.ssh/control-%h-%p-%r
-ControlPersist yes
+- when you enter tscc using SSH, you are assigned to these nodes
+- *SSH Keys*: fast access without password
+  - like how we set github SSH Keys
+  - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
+- Use [[https://www.ssh.com/academy/ssh/config][SSH config]] to simplify ssh commands with a demo
+  - You can paste this into the file ~/.ssh/config
+  - Next time, you can use `ssh tscc` as a short command.
+  #+BEGIN_SRC ssh
+    Host *
+        ControlMaster auto
+        ServerAliveInterval 5
+        ServerAliveCountMax 2
+        ControlPath ~/.ssh/control-%h-%p-%r
+        ControlPersist yes
 
-Host tscc
-HostName [tscc login node addres]
-User [your name]
-IdentityFile ~/.ssh/[your private key file]
-#+END_SRC
+    Host tscc
+        HostName [tscc login node addres]
+        User [your name]
+        IdentityFile ~/.ssh/[your private key file]
+  #+END_SRC
+
 *** Computing nodes:
 - when you submit jobs (either interactive or not) with *qsub*
 - [[https://www.sdsc.edu/services/hpc/tscc/condo_details.html][TSCC condo program]]
