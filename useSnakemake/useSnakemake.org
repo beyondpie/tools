@@ -1,23 +1,21 @@
 #+TITLE: Use Snakemake to organize the jobs in TSCC
 #+author: Songpeng Zu
 #+date: 2023-05-18
-
+* Content and Goal
+** Content:
 In this page, I mainly talk about
 - how to submit jobs in TSCC
 - especially how to organize jobs using snakemake
-  
 Though the pipeline is specific towards TSCC, the principles are
 shared for others' HPC(High-Performance Computing) system. And the
 idea of describing the depenecies among tasks demonstrate a general
 pattern of organizing complex projects.
-
-The aims for this page:
+** Goal:
 1. present a global picture about how jobs are scheduled in TSCC
 2. provide a relatively complete reference for later reading when using
 3. list the resources mentioned in this page so that readers could
-  check them in details
-
-* Introduction
+  check them in details.
+* Introduction to TSCC
 ** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
 *** Login nodes:
 - when you enter tscc using SSH, you are assigned to these nodes
@@ -41,7 +39,6 @@ The aims for this page:
         User [your name]
         IdentityFile ~/.ssh/[your private key file]
   #+END_SRC
-
 *** Computing nodes:
 - when you submit jobs (either interactive or not) with *qsub*
 - [[https://www.sdsc.edu/services/hpc/tscc/condo_details.html][TSCC condo program]]
@@ -56,31 +53,74 @@ The aims for this page:
 - specific ones for data-intensive works, like copy big data.
 - No needs to submit jobs, just run your commands.
 *** Storage
-- OASIS: 800+ TB Data Oasis Lustre-based high performance parallel
+- *OASIS*: 800+ TB Data Oasis Lustre-based high performance parallel
   file system
-  - Each use has 25TB space.
-  - 90-day purge policy
+  - Each use has *25TB* space.
+  - *90-day* purge policy
   - Use =touch [your file]= to update the file timestamp
   - Use =find . -exec touch {} \;= to update the files in current
     directories.
-- HOME: =~=, 100 GB per user
-- PROJECT: condo storage we buy
+  - Efficiently to handle large files; not good to write many small
+    files.
+- *HOME*: =~=, 100 GB per user
+  - Jobs' output should be written into this.
+    - This NFS file system has only one server handling all the
+      metadata and storage requirements.
+- *PROJECT*: condo storage we buy
   - Typically 300 TB shared by all the users in our lab
   - use =df -h [project dir]= to check the space information
-** Queue: assign a queue when you submitting a job
-- hotel
+- *TMPDIR*
+  - handle temp many files and will be removed after job is done
 ** [[https://www.sdsc.edu/services/hpc/tscc/hotel_details.html][SU]]: how we pay to TSCC
-- 1 SU: 1 core * 1 hour
-  - core resources will be calculated once we submit jobs
-  - time resources will be re-estimated based on how long we acutally
-    use
+*** 1 SU: 1 core * 1 hour
+- core resources will be calculated *once* we submit jobs
+- time resources will be *re-estimated*
 - $250 (10K SUs): 1 SU ~ $0.025
-- =gbalance -u [user name]= to check the money left
-  - add one line ~alias mymoney="gbalance -u [user name]"~ into your
-    =~/.bashrc= file and ~source ~/.bashrc~. Then use ~mymoney~ to
-    check your status.
+*** how to check money left:
+- =gbalance -u [user name]=
+- add one line ~alias mymoney="gbalance -u [user name]"~ into your
+  =~/.bashrc= file and ~source ~/.bashrc~. Then use ~mymoney~ to
+  check your status.
+** Queue: assign a queue when you submitting a job
+- *hotel*
+  - max walltime: 168 hours (1 week); max cores/user: 128
+- *home*
+  - max walltime: unlimited; max cores/user: unlimited
+- *glean*: free of charge but may be stoped by system at any time
+  - max walltime: 8 hours; max cores/users: 1024
+- gpu-related queues:
+  - *gpu-hotel*: like *hotel*
+  - *gpu-condo*: max walltime: 8 hours; max cores/user: 84
 * Submit jobs in TSCC
-** P
+** Job manager / schedular in HPC
+- TORQUE Resource Manager (or Portable Batch System, PBS)
+  - TSCC now uses this
+- [[https://slurm.schedmd.com/documentation.html][Slurm]] workload manager
+  - [[https://www.youtube.com/watch?v=qf3iMO4wer8][TSCC 2.0]] will use this
+** Typical PBS script
+*** A draft of PBS script
+#+BEGIN_SRC bash
+#! /bin/bash
+#PBS -q glean
+#PBS -N test_pbs
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=[hh:mm:ss]
+#PBS -o [output file]
+#PBS -e [error file]
+#PBS -V
+#PBS -M [email address list]
+#PBS -m abe
+#PBS -A ren-group
+[All the shell commands you want to have here]
+#+END_SRC
+- Create a script like the one above then =qsub [the_script]=
+- Use =qstat -u [user name]= to get the status of the submitted job
+*** Interactive job
+- =qsub -I -q glean -l nodes=1:ppn=2 -l walltime=08:00:00=
+- Add ~alias myjob="qsub -I -q glean -l nodes=1:ppn=2 -l
+  walltime=08:00:00"~ to your ~/.bashrc, then =source ~./bashrc=.
+  You can then use =myjob= to quickly start an interactive job
+  without needing to remember the details.
 * Snakemake
 * Use Snakemake to control the jobs in TSCC
 
