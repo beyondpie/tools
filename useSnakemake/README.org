@@ -141,7 +141,84 @@ pattern of organizing complex projects.
 - support config files like *yaml*, *json*.
 - support HPC: both PBS and Slurm
 *** How it looks like:
+#+BEGIN_SRC snakemake
+   ## optional config file
+   configfile: "config.yaml"
+   content = "say hi"
+   samples = ["a", "b"]
+   ## all the output files you want to have
+   rule all:
+       input:
+          expand("flag/pref_{s}.done", s = samples)
+          expand("flag/first_{s}.done", s = samples)
 
+   ## then set up the rules about how to generate them
+   rule pre:
+       output:
+          # s will be infered based on rule all output
+          # here it will be a or b.
+          # snakemake will run s=a and s=b in parallel if possible
+          # touch will be automatically  generate the flag file
+          # once the rule is done.
+          touch("flag/pre_{s}.done")
+       log:
+          "log/{s}.log"
+       shell:
+          """
+          # wildcards.s to get the a / b
+          echo "pre:" {content} {wildcards.s}
+          """
+  rule first:
+      # snakemake will know that it depends on the output of pre
+      # then the rule will run after pre
+      input:
+          "flag/pre_{s}.done"
+      output:
+          touch("flag/first_{s}.done")
+      shell:
+          """
+          echo "first:" {content} {wildcards.s}
+          """
+#+END_SRC
+- Then save the above into a file named *demo.snakefile*.
+- =snakemake -f demo.snakefile= to run the snakemake.
 * Use Snakemake to control the jobs in TSCC
+** Use [[https://github.com/snakemake-profiles/doc][profile]] to setup the particular enviroment of HPC
+** Demo for PBS
+- =mkdir profile=
+- under profile, we create two files.
+  - one is *config.yaml*.
+    #+BEGIN_SRC yaml
+    cluster-config: "profile/cluster.yaml"
+    cluster: "qsub -N {cluster.jobname} -l nodes={cluster.nodes}:ppn={cluster.ppn},mem={cluster.mem},walltime={cluster.walltime} -A {cluster.account} -q {cluster.queue} -M {cluster.email} -m {cluster.mailon} -j {cluster.jobout} -e {cluster.logdir} -V "
+    jobs: 100
+    #+END_SRC
+  - one is *cluster.yaml* .
+    #+BEGIN_SRC yaml
+      __default__:
+          jobname: "{rule}.{wildcards}"
+          nodes: 1
+          ppn: 1
+          walltime: "02:00:00"
+          account: "ren-group"
+          queue: "glean"
+          email: "debug.pie@gmail.com"
+          mailon: "ae"
+          jobout: "oe"
+          log: "{rule}.{wildcards}.tscc.log"
+      pre:
+          ppn: 1
+          queue: "glean"
+          walltime: 00:10:00
+      first:
+          ppn: 1
+          queue: "glean"
+          walltime: 00:10:00
+    #+END_SRC
+  - Then =snakemake -f demo.snakemake --profile profile= to submit
+    jobs into PBS
+- [[https://github.com/beyondpie/CEMBA_wmb_snATAC/tree/main/snakemake.template][An example]]
+
+  
 
    
