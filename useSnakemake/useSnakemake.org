@@ -24,19 +24,19 @@ The aims for this page:
     - *SSH Keys*: fast access without password
       - like how we set github SSH Keys
       - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
-        #+BEING_SRC ssh
-        Host *
-            ControlMaster auto
-            ServerAliveInterval 5
-            ServerAliveCountMax 2
-            ControlPath ~/.ssh/control-%h-%p-%r
-            ControlPersist yes
-        
-        Host tscc
-            HostName [tscc login node addres]
-            User [your name]
-            IdentityFile ~/.ssh/[your private key file]
-        #+END_SRC
+#+BEING_SRC ssh
+Host *
+ControlMaster auto
+ServerAliveInterval 5
+ServerAliveCountMax 2
+ControlPath ~/.ssh/control-%h-%p-%r
+ControlPersist yes
+
+Host tscc
+HostName [tscc login node addres]
+User [your name]
+IdentityFile ~/.ssh/[your private key file]
+#+END_SRC
 *** Computing nodes:
 - when you submit jobs (either interactive or not) with *qsub*
 - [[https://www.sdsc.edu/services/hpc/tscc/condo_details.html][TSCC condo program]]
