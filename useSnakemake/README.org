@@ -2,6 +2,8 @@
 #+author: Songpeng Zu
 #+date: 2023-05-18
 #+OPTIONS: toc:3
+#+STARTUP: indent
+
 * Content and Goal
 ** Content:
 In this page, I mainly talk about
