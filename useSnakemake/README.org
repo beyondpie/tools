@@ -1,4 +1,4 @@
-#+TITLE: Use Snakemake to organize the jobs in TSCC
+#+TITLE: TSCC and Snakemake
 #+author: Songpeng Zu
 #+date: 2023-05-18
 #+OPTIONS: toc:3
@@ -124,7 +124,24 @@ pattern of organizing complex projects.
   walltime=08:00:00"~ to your ~/.bashrc, then =source ~./bashrc=.
   You can then use =myjob= to quickly start an interactive job
   without needing to remember the details.
-* Snakemake
+* [[https://snakemake.github.io][Snakemake]]
+** Jobs manager:
+- handle jobs' dependencies
+- automatically run the pipeline from where it failed
+- if some intermedia files / scripts are updated, then automatically
+  update all the later rules depend on them.
+** Snakemake = Snake[Python] + make[GNU make]
+*** [[https://en.wikipedia.org/wiki/Make_(software)][make]]: dependency-tracking build utilities, written in 1976
+- Still widely used now, especially [[https://www.gnu.org/software/make/manual/make.html#Introduction][GNU make]]
+- Drawback:
+  - Lack of configuration file support, like *yaml*, *json*.
+  - Lack of support for jobs on HPC
+*** Snakemake:
+- written in Python, which makes it simple to use
+- support config files like *yaml*, *json*.
+- support HPC: both PBS and Slurm
+*** How it looks like:
+
 * Use Snakemake to control the jobs in TSCC
 
    
