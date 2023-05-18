@@ -23,10 +23,11 @@ The aims for this page:
 - when you enter tscc using SSH, you are assigned to these nodes
 - *SSH Keys*: fast access without password
   - like how we set github SSH Keys
-  - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
+  - See *Generating SSH Keys* in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
 - Use [[https://www.ssh.com/academy/ssh/config][SSH config]] to simplify ssh commands with a demo
   - You can paste this into the file ~/.ssh/config
-  - Next time, you can use `ssh tscc` as a short command.
+  - Next time, you can use =ssh tscc= as a short command.
+  - NOTE: replace all the contents within *[]* including *[* and *]*
   #+BEGIN_SRC ssh
     Host *
         ControlMaster auto
@@ -55,6 +56,7 @@ The aims for this page:
 - specific ones for data-intensive works, like copy big data.
 - No needs to submit jobs, just run your commands.
 ** Queue: assign a queue when you submitting a job
+
 ** SU: how we pay to TSCC
 *** 1 SU: 1 core * 1 hour
 - core resources will be calculated once we submit jobs
