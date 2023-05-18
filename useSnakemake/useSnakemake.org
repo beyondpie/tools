@@ -1,0 +1,45 @@
+#+TITLE: Use Snakemake to organize the jobs in TSCC
+#+author: Songpeng Zu
+#+date: 2023-05-18
+
+In this page, I mainly talk about
+- how to submit jobs in TSCC
+- especially how to organize jobs using snakemake
+  
+Though the pipeline is specific towards TSCC, the principles are
+shared for others' HPC(High-Performance Computing) system. And the
+idea of describing the depenecies among tasks demonstrate a general
+pattern of organizing complex projects.
+
+The aims for this page:
+1. present a global picture about how jobs are scheduled in TSCC
+2. provide a relatively complete reference for later reading when using
+3. list the resources mentioned in this page so that readers could
+  check them in details
+
+* Introduction
+** [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]], Triton Shared Computing Cluster in UCSD.
+*** Login nodes:
+- when you enter tscc using SSH, you are assigned to these nodes
+- *SSH Keys*: fast access without password
+  - like how we set github SSH Keys
+  - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
+*** Computing nodes:
+- when you submit jobs (either interactive or not) with *qsub*
+- 
+*** Data-intensive nodes:
+- named with *dm1*
+- specific ones for data-intensive works, like copy big data.
+- No needs to submit jobs, just run your commands.
+** Queue: assign a queue when you submitting a job
+** SU: how we pay to TSCC
+*** 1 SU: 1 CPU * 1 hour
+- CPU resources will be calculated once we submit jobs
+- time resources will be re-estimated based on how long we acutally use
+*** 1 SU ~ $0.025
+* Submit jobs in TSCC
+** P
+* Snakemake
+* Use Snakemake to control the jobs in TSCC
+
+   
