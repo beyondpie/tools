@@ -18,23 +18,42 @@ The aims for this page:
   check them in details
 
 * Introduction
-** [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]], Triton Shared Computing Cluster in UCSD.
+** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
 *** Login nodes:
-- when you enter tscc using SSH, you are assigned to these nodes
-- *SSH Keys*: fast access without password
-  - like how we set github SSH Keys
-  - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
+    - when you enter tscc using SSH, you are assigned to these nodes
+    - *SSH Keys*: fast access without password
+      - like how we set github SSH Keys
+      - See ~Generating SSH Keys~ in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
+        #+BEING_SRC ssh
+        Host *
+            ControlMaster auto
+            ServerAliveInterval 5
+            ServerAliveCountMax 2
+            ControlPath ~/.ssh/control-%h-%p-%r
+            ControlPersist yes
+        
+        Host tscc
+            HostName [tscc login node addres]
+            User [your name]
+            IdentityFile ~/.ssh/[your private key file]
+        #+END_SRC
 *** Computing nodes:
 - when you submit jobs (either interactive or not) with *qsub*
-- 
+- [[https://www.sdsc.edu/services/hpc/tscc/condo_details.html][TSCC condo program]]
+  - CPU Nodes:
+    - 2[Not sure]*18 cores, 256GB RAM in toal (7GB/core)
+    - 2[Not sure]*32 cores, 1TB RAM in total (15GB/core)
+  - GPU Nodes:
+    - CPU model: 2[Not sure]*32 cores, 256GB RAM in total (15GB/core)
+    - NVIDIA Ampere A100, 40GB GRAM
 *** Data-intensive nodes:
 - named with *dm1*
 - specific ones for data-intensive works, like copy big data.
 - No needs to submit jobs, just run your commands.
 ** Queue: assign a queue when you submitting a job
 ** SU: how we pay to TSCC
-*** 1 SU: 1 CPU * 1 hour
-- CPU resources will be calculated once we submit jobs
+*** 1 SU: 1 core * 1 hour
+- core resources will be calculated once we submit jobs
 - time resources will be re-estimated based on how long we acutally use
 *** 1 SU ~ $0.025
 * Submit jobs in TSCC
