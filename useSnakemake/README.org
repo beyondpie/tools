@@ -1,6 +1,7 @@
 #+TITLE: Use Snakemake to organize the jobs in TSCC
 #+author: Songpeng Zu
 #+date: 2023-05-18
+#+OPTIONS: toc:3
 * Content and Goal
 ** Content:
 In this page, I mainly talk about
