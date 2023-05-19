@@ -1,7 +1,7 @@
 demo:
 	-mkdir -p $@
 
-.PHONY: run tscc
+.PHONY: run tscc clean
 
 run : demo Snakefile
 	cp config.yaml $</config.yaml
@@ -16,3 +16,6 @@ tscc: demo Snakefile
 	cp -R profile/. $</profile
 	cd $< && snakemake --config content=bye\
      -c 1 -p --snakefile Snakefile -R --rerun-incomplete --profile profile
+
+clean:
+	-rm -rf demo
