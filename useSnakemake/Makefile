@@ -15,7 +15,9 @@ tscc: demo Snakefile
 	cp $(word 2,$^) $</Snakefile
 	cp -R profile/. $</profile
 	cd $< && snakemake --config content=bye\
-     -c 1 -p --snakefile Snakefile -R --rerun-incomplete --profile profile
+     -c 1 -p --snakefile Snakefile -R \
+     --latency-wait 20 \
+     --rerun-incomplete --profile profile
 
 clean:
 	-rm -rf demo
