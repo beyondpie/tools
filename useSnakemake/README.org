@@ -183,10 +183,15 @@ pattern of organizing complex projects.
 - Then save the above into a file named *demo.snakefile*.
 - =snakemake -f demo.snakefile= to run the snakemake.
 ** Summary
-- snakemake uses *input* and *output* of *rules* to organize the depencies of tasks.
+- *snakefile*
+  - just python syntax + snakemake key words, such as *config*,
+    *rule*, *expand*, *wildcards* and so on.
+  - [OPTION but good in practice] *config.yaml* to claim variables
 - The *input* in *rule all* is used to claim all the final outputs
-- *wildcards* will be inferred and the key mechanism to run multiple
-  jobs in parallel
+- *input* and *output* of *rules* to organize the depencies of tasks.
+- *wildcards*
+  - inferred based on file names
+  - the key mechanism to run multiple jobs in parallel
 * Use Snakemake to control the jobs in TSCC
 ** Use [[https://github.com/snakemake-profiles/doc][profile]] to setup the particular enviroment of HPC
 ** Demo for PBS
