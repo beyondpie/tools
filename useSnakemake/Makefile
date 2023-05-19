@@ -10,7 +10,7 @@ run : demo Snakefile
 	cd $< && snakemake \
      -c 1 -p --snakefile Snakefile -R --rerun-incomplete
 
-tscc: test_dir Snakefile
+tscc: demo Snakefile
 	cp config.yaml $</config.yaml
 	cp $(word 2,$^) $</Snakefile
 	cp -R profile/. $</profile

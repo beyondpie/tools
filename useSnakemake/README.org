@@ -18,6 +18,9 @@
   2. =conda activate base=
   3. =mamba create -c conda-forge -c bioconda -n snakemake snakemake=
 - =conda install -c conda-forge snakemake= in a given conda env
+** Prepare the demo scripts
+1. =git clone https://github.com/beyondpie/tools=
+2. =cd useSnakemake=
 
 * Introduction to TSCC
 ** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
