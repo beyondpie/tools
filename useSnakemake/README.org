@@ -21,7 +21,6 @@
 ** Prepare the demo scripts
 1. =git clone https://github.com/beyondpie/tools=
 2. =cd useSnakemake=
-
 * Introduction to TSCC
 ** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
 *** Login nodes:
