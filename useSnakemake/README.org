@@ -244,7 +244,6 @@
 - Use *glean* to run your snakemake with no payment
   - As long as the job can be finished within 8 hours
   - If jobs fail by unknown reason, just rerun snakemake. 
-** [[https://github.com/beyondpie/CEMBA_wmb_snATAC/tree/main/snakemake.template][An example]]
 
   
 
