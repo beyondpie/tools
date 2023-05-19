@@ -17,7 +17,7 @@
   1. =conda install -n base -c conda-forge mamba=
   2. =conda activate base=
   3. =mamba create -c conda-forge -c bioconda -n snakemake snakemake=
-- =conda install -c conda-forge snakemake= in a given conda env
+- =conda install -c conda-forge -c bioconda snakemake= in a given conda env
 ** Prepare the demo scripts
 1. =git clone https://github.com/beyondpie/tools=
 2. =cd useSnakemake=
