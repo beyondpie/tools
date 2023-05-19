@@ -6,18 +6,11 @@
 
 * Content and Goal
 ** Content:
-In this page, I mainly talk about
-- how to submit jobs in TSCC
-- especially how to organize jobs using snakemake
-Though the pipeline is specific towards TSCC, the principles are
-shared for others' HPC(High-Performance Computing) system. And the
-idea of describing the depenecies among tasks demonstrate a general
-pattern of organizing complex projects.
+1. how to submit jobs in *TSCC*
+2. how to organize jobs using *snakemake*
 ** Goal:
-1. present a global picture about how jobs are scheduled in TSCC
-2. provide a relatively complete reference for later reading when using
-3. list the resources mentioned in this page so that readers could
-  check them in details.
+1. present a *global picture* about jobs in TSCC
+2. provide a relatively complete *reference*
 * Introduction to TSCC
 ** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
 *** Login nodes:
@@ -96,7 +89,7 @@ pattern of organizing complex projects.
   - *gpu-hotel*: like *hotel*
   - *gpu-condo*: max walltime: 8 hours; max cores/user: 84
 * Submitting jobs in TSCC
-** Job manager / schedular in HPC
+** Job manager/schedular in HPC (High-Performace Computing) system
 - TORQUE Resource Manager (or Portable Batch System, PBS)
   - TSCC now uses this
 - [[https://slurm.schedmd.com/documentation.html][Slurm]] workload manager
