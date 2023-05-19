@@ -182,6 +182,11 @@ pattern of organizing complex projects.
 #+END_SRC
 - Then save the above into a file named *demo.snakefile*.
 - =snakemake -f demo.snakefile= to run the snakemake.
+** Summary
+- snakemake uses *input* and *output* of *rules* to organize the depencies of tasks.
+- The *input* in *rule all* is used to claim all the final outputs
+- *wildcards* will be inferred and the key mechanism to run multiple
+  jobs in parallel
 * Use Snakemake to control the jobs in TSCC
 ** Use [[https://github.com/snakemake-profiles/doc][profile]] to setup the particular enviroment of HPC
 ** Demo for PBS
@@ -217,7 +222,9 @@ pattern of organizing complex projects.
     #+END_SRC
   - Then =snakemake -f demo.snakemake --profile profile= to submit
     jobs into PBS
-- [[https://github.com/beyondpie/CEMBA_wmb_snATAC/tree/main/snakemake.template][An example]]
+** Tips
+- Use *screen* in login nodes, then start snakemake
+** [[https://github.com/beyondpie/CEMBA_wmb_snATAC/tree/main/snakemake.template][An example]]
 
   
 
