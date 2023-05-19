@@ -26,7 +26,7 @@ pattern of organizing complex projects.
   - like how we set github SSH Keys
   - See *Generating SSH Keys* in [[https://www.sdsc.edu/support/user_guides/tscc.html][TSCC]]
 - Use [[https://www.ssh.com/academy/ssh/config][SSH config]] to simplify ssh commands with a demo
-  - You can paste this into the file ~/.ssh/config
+  - You can paste this into the file *~/.ssh/config*
   - Next time, you can use =ssh tscc= as a short command.
   - NOTE: replace all the contents within *[]* including *[* and *]*
   #+BEGIN_SRC ssh
@@ -78,7 +78,8 @@ pattern of organizing complex projects.
 *** 1 SU: 1 core * 1 hour
 - core resources will be calculated *once* we submit jobs
 - time resources will be *re-estimated*
-- $250 (10K SUs): 1 SU ~ $0.025
+- $250 (10K SUs):
+  - 1 SU ~ $0.025, 400 SUs ~ $1, 2K SUs ~ Starbuck coffee
 *** how to check money left:
 - =gbalance -u [user name]=
 - add one line ~alias mymoney="gbalance -u [user name]"~ into your
@@ -94,7 +95,7 @@ pattern of organizing complex projects.
 - gpu-related queues:
   - *gpu-hotel*: like *hotel*
   - *gpu-condo*: max walltime: 8 hours; max cores/user: 84
-* Submit jobs in TSCC
+* Submitting jobs in TSCC
 ** Job manager / schedular in HPC
 - TORQUE Resource Manager (or Portable Batch System, PBS)
   - TSCC now uses this
@@ -125,6 +126,10 @@ pattern of organizing complex projects.
   You can then use =myjob= to quickly start an interactive job
   without needing to remember the details.
 * [[https://snakemake.github.io][Snakemake]]
+** Why we need it
+- I want to submit 1,000 jobs.
+- Some of them are failed, I need to rerun them.
+- I have a pipeline, which means jobs have dependencies
 ** Jobs manager:
 - handle jobs' dependencies
 - automatically run the pipeline from where it failed
@@ -136,6 +141,7 @@ pattern of organizing complex projects.
 - Drawback:
   - Lack of configuration file support, like *yaml*, *json*.
   - Lack of support for jobs on HPC
+- Snakemake may die in the future, but make should be still alive.
 *** Snakemake:
 - written in Python, which makes it simple to use
 - support config files like *yaml*, *json*.
@@ -229,6 +235,10 @@ pattern of organizing complex projects.
     jobs into PBS
 ** Tips
 - Use *screen* in login nodes, then start snakemake
+- Use *glean* to test your pipeline with no payment
+- Use *glean* to run your snakemake with no payment
+  - As long as the job can be finished within 8 hours
+  - If jobs fail by unknown reason, just rerun snakemake. 
 ** [[https://github.com/beyondpie/CEMBA_wmb_snATAC/tree/main/snakemake.template][An example]]
 
   
