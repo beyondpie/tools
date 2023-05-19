@@ -11,6 +11,14 @@
 ** Goal:
 1. present a *global picture* about jobs in TSCC
 2. provide a relatively complete *reference*
+** Installation of snakemake
+- [[https://snakemake.readthedocs.io/en/stable/getting_started/installation.html][Install snakemake using conda]]
+  (Install [[https://github.com/conda-forge/miniforge#mambaforge][miniforge]] (fast and preferred) or conda)
+  1. =conda install -n base -c conda-forge mamba=
+  2. =conda activate base=
+  3. =mamba create -c conda-forge -c bioconda -n snakemake snakemake=
+- =conda install -c conda-forge snakemake= in a given conda env
+
 * Introduction to TSCC
 ** [[https://www.sdsc.edu/services/hpc/tscc/index.html][TSCC]], Triton Shared Computing Cluster in UCSD.
 *** Login nodes:
@@ -148,7 +156,7 @@
    ## all the output files you want to have
    rule all:
        input:
-          expand("flag/pref_{s}.done", s = samples)
+          expand("flag/pre_{s}.done", s = samples)
           expand("flag/first_{s}.done", s = samples)
 
    ## then set up the rules about how to generate them
@@ -165,7 +173,7 @@
        shell:
           """
           # wildcards.s to get the a / b
-          echo "pre:" {content} {wildcards.s}
+          echo "pre:" {content} {wildcards.s} 2> {log}
           """
   rule first:
       # snakemake will know that it depends on the output of pre
@@ -174,13 +182,15 @@
           "flag/pre_{s}.done"
       output:
           touch("flag/first_{s}.done")
+      log:
+          "log/{s}.log"
       shell:
           """
-          echo "first:" {content} {wildcards.s}
+          echo "first:" {content} {wildcards.s} 2> {log}
           """
 #+END_SRC
 - Then save the above into a file named *demo.snakefile*.
-- =snakemake -f demo.snakefile= to run the snakemake.
+- =snakemake --snakefile demo.snakefile= to run the snakemake.
 ** Summary
 - *snakefile*
   - just python syntax + snakemake key words, such as *config*,
@@ -199,7 +209,7 @@
   - one is *config.yaml*.
     #+BEGIN_SRC yaml
     cluster-config: "profile/cluster.yaml"
-    cluster: "qsub -N {cluster.jobname} -l nodes={cluster.nodes}:ppn={cluster.ppn},mem={cluster.mem},walltime={cluster.walltime} -A {cluster.account} -q {cluster.queue} -M {cluster.email} -m {cluster.mailon} -j {cluster.jobout} -e {cluster.logdir} -V "
+    cluster: "qsub -N {cluster.jobname} -l nodes={cluster.nodes}:ppn={cluster.ppn},walltime={cluster.walltime} -A {cluster.account} -q {cluster.queue} -M {cluster.email} -m {cluster.mailon} -j {cluster.jobout} -e {cluster.logdir} -V "
     jobs: 100
     #+END_SRC
   - one is *cluster.yaml* .
@@ -224,7 +234,7 @@
           queue: "glean"
           walltime: 00:10:00
     #+END_SRC
-  - Then =snakemake -f demo.snakemake --profile profile= to submit
+  - Then =snakemake --snakefile demo.snakemake --profile profile= to submit
     jobs into PBS
 ** Tips
 - Use *screen* in login nodes, then start snakemake
