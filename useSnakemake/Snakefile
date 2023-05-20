@@ -1,5 +1,6 @@
 ## optional config file
 configfile: "config.yaml"
+
 content = config["content"]
 samples = config["samples"]
 ## all the output files you want to have
