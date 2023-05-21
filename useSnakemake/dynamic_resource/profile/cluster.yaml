@@ -1,0 +1,23 @@
+__default__:
+  jobname: "{rule}.{wildcards}"
+  nodes: 1
+  ppn: 1
+  walltime: "02:00:00"
+  account: "ren-group"
+  queue: "glean"
+  email: "debug.pie@gmail.com"
+  mailon: "ae"
+  jobout: "oe"
+  log: "{rule}.{wildcards}.tscc.log"
+
+pre:
+  ppn: 1
+  queue: "glean"
+  walltime: 00:10:00
+
+first:
+  ppn: 1
+  queue: "glean"
+  walltime: 00:10:00
+
+
