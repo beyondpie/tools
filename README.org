@@ -1,0 +1,4 @@
+* Collections of tools I use
+** R: see [[file:useR.org][useR]]
+** Snakemake: see [[file:useSnakemake/README.org][useSnakemake]]
+** Emacs: see [[https://github.com/beyondpie/.emacs.d][my emacs config]]
