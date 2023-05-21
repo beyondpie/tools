@@ -6,8 +6,9 @@ samples = config["samples"]
 ## all the output files you want to have
 rule all:
     input:
-        expand("flag/pre_{s}.done", s = samples),
-        expand("flag/first_{s}.done", s = samples)
+        expand("flag/pre_{s}.done", s = samples)
+        # expand("flag/first_{s}.done", s = samples)
+myppn = {'a': 2, 'b': 3}
 
 ## then set up the rules about how to generate them
 rule pre:
@@ -18,6 +19,8 @@ rule pre:
         # touch will be automatically  generate the flag file
         # once the rule is done.
         touch("flag/pre_{s}.done")
+    resources:
+        ppn = myppn[{s}]
     log:
         "log/{s}.log"
     shell:
