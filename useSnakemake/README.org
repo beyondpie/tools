@@ -11,13 +11,14 @@
 ** Goal:
 1. present a *global picture* about jobs in TSCC
 2. provide a relatively complete *reference*
-** Installation of snakemake
+** Installation of snakemake (three ways)
 - [[https://snakemake.readthedocs.io/en/stable/getting_started/installation.html][Install snakemake using conda]]
   (Install [[https://github.com/conda-forge/miniforge#mambaforge][miniforge]] (fast and preferred) or conda)
   1. =conda install -n base -c conda-forge mamba=
   2. =conda activate base=
   3. =mamba create -c conda-forge -c bioconda -n snakemake snakemake=
 - =conda install -c conda-forge -c bioconda snakemake= in a given conda env
+- =make install= under the current directory, see Makefile for detail
 ** Prepare the demo scripts
 1. =git clone https://github.com/beyondpie/tools=
 2. =cd useSnakemake=
