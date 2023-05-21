@@ -20,7 +20,7 @@ rule pre:
         # once the rule is done.
         touch("flag/pre_{s}.done")
     resources:
-        ppn = myppn[{s}]
+        ppn = lambda wildcards: myppn[wildcards.s]
     log:
         "log/{s}.log"
     shell:
