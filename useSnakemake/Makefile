@@ -4,7 +4,10 @@ snakemake := snakemake
 demo:
 	-mkdir -p $@
 
-.PHONY: run tscc clean
+.PHONY: install run tscc clean
+
+install: enviroment.yaml
+	conda env create --file $<
 
 run : demo Snakefile
 	cp config.yaml $</config.yaml
