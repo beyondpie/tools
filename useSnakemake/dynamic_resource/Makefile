@@ -25,5 +25,14 @@ tscc: demo Snakefile
      --latency-wait 20 \
      --rerun-incomplete --profile profile
 
+tscc: demo Snakefile
+	cp config.yaml $</config.yaml
+	cp $(word 2,$^) $</Snakefile
+	cp -R profile/. $</profile
+	cd $< && ${snakemake} --config content=bye\
+     -c 1 -p --snakefile Snakefile -R \
+     --latency-wait 20 \
+     --rerun-incomplete --profile pbs-toque_profile
+
 clean:
 	-rm -rf demo
