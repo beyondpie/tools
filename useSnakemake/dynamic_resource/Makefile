@@ -32,7 +32,7 @@ tscc2: demo Snakefile
 	cd $< && ${snakemake} --config content=bye\
      -c 1 -p --snakefile Snakefile -R \
      --latency-wait 20 \
-     --rerun-incomplete --profile pbs-toque_profile
+     --rerun-incomplete --profile pbs_profile
 
 clean:
 	-rm -rf demo
