@@ -38,3 +38,5 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 /useSnakemake/demo/
+useSnakemake/dynamic_resource/demo/
+useSnakemake/test.o31682514
