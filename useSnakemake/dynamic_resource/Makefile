@@ -25,7 +25,7 @@ tscc: demo Snakefile
      --latency-wait 20 \
      --rerun-incomplete --profile profile
 
-tscc: demo Snakefile
+tscc2: demo Snakefile
 	cp config.yaml $</config.yaml
 	cp $(word 2,$^) $</Snakefile
 	cp -R profile/. $</profile
