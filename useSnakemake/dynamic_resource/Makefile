@@ -28,7 +28,7 @@ tscc: demo Snakefile
 tscc2: demo Snakefile
 	cp config.yaml $</config.yaml
 	cp $(word 2,$^) $</Snakefile
-	cp -R profile/. $</profile
+	cp -R pbs_profile/. $</pbs_profile
 	cd $< && ${snakemake} --config content=bye\
      -c 1 -p --snakefile Snakefile -R \
      --latency-wait 20 \
