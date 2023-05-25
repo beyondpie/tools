@@ -40,3 +40,4 @@ vignettes/*.pdf
 /useSnakemake/demo/
 useSnakemake/dynamic_resource/demo/
 useSnakemake/test.o31682514
+/useSnakemake/conda_script/demo/
