@@ -19,8 +19,8 @@ debug : demo Snakefile
 
 run : demo Snakefile
 	cp config.yaml $</config.yaml
+	cp pre.py $</pre.py
 	cp $(word 2,$^) $</Snakefile
-	cp -R profile/. $</profile
 	cd $< && ${snakemake} \
      -c 1 -p --snakefile Snakefile -R --rerun-incomplete
 
