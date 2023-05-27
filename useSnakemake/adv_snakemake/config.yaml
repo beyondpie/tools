@@ -1,0 +1,7 @@
+content: sayhi
+samples: [a,b, c]
+knn_params:
+  method: exact
+  n: 50
+
+

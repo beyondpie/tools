@@ -16,6 +16,9 @@ def getwt(wcs, attempt):
         return mywt[wcs.s]
     else:
         return mywt_default
+    
+knn_params = config["knn_params"]
+    
 ## then set up the rules about how to generate them
 rule pre:
     output:
@@ -25,15 +28,14 @@ rule pre:
         # touch will be automatically  generate the flag file
         # once the rule is done.
         touch("flag/pre_{s}.done")
-    params:
-        ppn = lambda wildcards: myppn[wildcards.s],
     resources:
-        ppn = params.ppn
-        walltime=getwt,
+        ppn = lambda wildcards: myppn[wildcards.s],
+        walltime=getwt
     conda:
         "sa2dev"
     log:
         "log/{s}.log"
+    shell:
     script:
         "pre.py"
 
