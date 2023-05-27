@@ -25,9 +25,11 @@ rule pre:
         # touch will be automatically  generate the flag file
         # once the rule is done.
         touch("flag/pre_{s}.done")
-    resources:
+    params:
         ppn = lambda wildcards: myppn[wildcards.s],
-        walltime=getwt
+    resources:
+        ppn = params.ppn
+        walltime=getwt,
     conda:
         "sa2dev"
     log:
