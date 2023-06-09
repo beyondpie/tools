@@ -1,0 +1,30 @@
+* Load profile under terminal
+  Ref: [[https://apple.stackexchange.com/questions/51036/what-is-the-difference-between-bash-profile-and-bashrc][.bash_profile vs .bashrc]]
+  1. .bash_profile, .profile are used for interactive login mode
+     - .profile is not limited to bash
+     - bash will search .bash_profile, then .profile
+  2. .bashrc is used for interactive non-login mode
+     - non-login: e.g., after login, we open new terminal window
+  3. In MacOS, terminal is usually in interactive login mode
+  4. How to load the /dotprofile.template/ without repeat:
+     We can put them into our .bash_profile or .bashrc
+     #+BEGIN_SRC shell
+       DOTPROFILE="dotprofile..template"
+       if [ -z ${DOTPROFILE_TAG+x} ]
+       then
+           if [ -f $DOTPROFILE ]
+           then
+               echo "Load dotprofile: $DOTPROFILE"
+               source $DOTPROFILE
+           else
+               echo "$DOTPROFILE does not exist."
+           fi
+       else
+           echo "Detect DOTPROFILE_TAG: ${DOTPROFILE_TAG} from $DOTPROFILE."
+       fi
+     #+END_SRC
+  5. If planning to keep .bash_profile and .bashrc with the same enviroments,
+     we can let write the codes above in .bash_profile, and source .bash_profile
+     in .bashrc or vice versa. 
+
+

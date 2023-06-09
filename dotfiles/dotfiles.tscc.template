@@ -1,0 +1,30 @@
+DOTPROFILE="${HOME}/dotfiles/env/dotprofile.sh"
+if [ -z ${DOTPROFILE_TAG+x} ]
+then
+    if [ -f $DOTPROFILE ]
+    then
+        echo "Load dotprofile: $DOTPROFILE"
+        source $DOTPROFILE
+    else
+        echo "$DOTPROFILE does not exist."
+    fi
+else
+    echo "Detect DOTPROFILE_TAG: ${DOTPROFILE_TAG} from $DOTPROFILE."
+fi
+export USER_ME=foo
+alias ibash="qsub -I -l nodes=1:ppn=1 -l mem=100gb -l walltime=05:00:00"
+alias ibigbash="qsub -I -q pdafm -l mem=200gb -lnodes=1:ppn=1 -l walltime=05:00:00"
+alias freebash="qsub -I -q glean -l nodes=1:ppn=6 -l walltime=8:00:00 -l mem=80G"
+alias mymoney="gbalance -u ${USER_ME}"
+
+# kill all the submitted jobs
+alias kill_all="qselect -u ${USER_ME} | xargs qdel "
+# delete jobs match some patterns
+kill_some() {
+    local pattern=$1
+    qstat -u ${USER_ME} | grep $pattern \
+        | awk '{print $1}' \
+        | awk -F "." '{print $1}' \
+        | xargs qdel
+}
+export -f kill_some
