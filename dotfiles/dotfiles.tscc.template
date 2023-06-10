@@ -3,13 +3,8 @@ if [ -z ${DOTPROFILE_TAG+x} ]
 then
     if [ -f $DOTPROFILE ]
     then
-        echo "Load dotprofile: $DOTPROFILE"
         source $DOTPROFILE
-    else
-        echo "$DOTPROFILE does not exist."
     fi
-else
-    echo "Detect DOTPROFILE_TAG: ${DOTPROFILE_TAG} from $DOTPROFILE."
 fi
 export USER_ME=foo
 alias ibash="qsub -I -l nodes=1:ppn=1 -l mem=100gb -l walltime=05:00:00"

@@ -34,7 +34,6 @@ check_brew="/opt/homebrew"
 if [ -d ${check_brew} ]
 then
     BREW_PATH="/opt/homebrew"
-    echo "Maybe Apple silicon homebrew: ${BREW_PATH}."
     export PATH=${BREW_PATH}/bin:${PATH}
 else
     BREW_PATH="/usr/local"
@@ -42,11 +41,8 @@ fi
 BREW_GNUPATH=${BREW_PATH}/opt/coreutils/libexec/gnubin
 if [ -d ${BREW_GNUPATH} ]
 then
-    echo "Find GNU Binaries under brew: ${BREW_GNUPATH}."
     export PATH=${BREW_GNUPATH}:${PATH}
     export MANPATH=${BREW_PATH}/opt/coreutils/libexec/gnuman:${MANPATH}
-else
-    echo "Did not find: ${BREW_GNUPATH}."
 fi
 
 export LC_ALL=en_US.UTF-8
@@ -65,22 +61,15 @@ alias mygitignore='git status --porcelain |  grep '^??' | cut -c4- >>.gitignore'
 #   - use CONDA_BIN manually
 case $HOSTNAME in
     *imac*)
-        echo "set conda for imac"
         CONDA_PATH="${HOME}/mambaforge"
-        echo ${CONDA_PATH}
         ;;
     *pro*)
-        echo "set conda for macbook pro"
         CONDA_PATH="${HOME}miniforge"
-        echo ${CONDA_PATH}
         ;;
     tscc*)
-        echo "set conda for tscc system"
         CONDA_PATH="${HOME}/miniconda3"
-        echo ${CONDA_PATH}
         ;;
     *)
-        echo "Unknown HOST: ${HOSTNAME}"
         ;;
 esac
 __conda_setup="$(${CONDA_PATH}/bin/conda 'shell.bash' 'hook' 2> /dev/null)"
@@ -96,8 +85,7 @@ fi
 unset __conda_setup
 mamba_script=${CONDA_PATH}/etc/profile.d/mamba.sh
 if [ -f ${mamba_script} ]; then
-    echo "Also run mamba.sh under ${mamba_script}"
-    . ${mamba_script}
+    source ${mamba_script}
 fi
 export WORKON_HOME=${CONDA_PATH}/envs
 export CONDA_AUTO_ACTIVATE_BASE=true
@@ -110,7 +98,6 @@ export LSP_USE_PLISTS=true
 # * goolge cloud SDK
 case $HOSTNAME in
     tscc*)
-        echo "set GOOGLE SDK for tscc"
         GOOGLE_SDK="${HOME}/softwares/google-cloud-sdk"
         if [ -f ${GOOGLE_SDK}/path.bash.inc ]
         then

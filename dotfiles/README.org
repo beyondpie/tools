@@ -14,13 +14,8 @@
        then
            if [ -f $DOTPROFILE ]
            then
-               echo "Load dotprofile: $DOTPROFILE"
                source $DOTPROFILE
-           else
-               echo "$DOTPROFILE does not exist."
            fi
-       else
-           echo "Detect DOTPROFILE_TAG: ${DOTPROFILE_TAG} from $DOTPROFILE."
        fi
      #+END_SRC
   5. If planning to keep .bash_profile and .bashrc with the same enviroments,
