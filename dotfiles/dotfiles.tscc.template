@@ -1,10 +1,7 @@
 DOTPROFILE="${HOME}/dotfiles/env/dotprofile.sh"
-if [ -z ${DOTPROFILE_TAG+x} ]
+if [ -f $DOTPROFILE ]
 then
-    if [ -f $DOTPROFILE ]
-    then
-        source $DOTPROFILE
-    fi
+    source $DOTPROFILE
 fi
 export USER_ME=foo
 alias ibash="qsub -I -l nodes=1:ppn=1 -l mem=100gb -l walltime=05:00:00"

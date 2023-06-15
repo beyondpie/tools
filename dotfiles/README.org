@@ -9,14 +9,10 @@
   4. How to load the /dotprofile.template/ without repeat:
      We can put them into our .bash_profile or .bashrc
      #+BEGIN_SRC shell
-       DOTPROFILE="dotprofile.template"
-       if [ -z ${DOTPROFILE_TAG+x} ]
-       then
-           if [ -f $DOTPROFILE ]
-           then
-               source $DOTPROFILE
-           fi
-       fi
+     if [ -f $DOTPROFILE ]
+     then
+         source $DOTPROFILE
+     fi
      #+END_SRC
   5. If planning to keep .bash_profile and .bashrc with the same enviroments,
      we can let write the codes above in .bash_profile, and source .bash_profile
