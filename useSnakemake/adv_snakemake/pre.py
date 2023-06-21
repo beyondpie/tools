@@ -1,5 +1,5 @@
-# import snapatac2 as sa2
-# print(sa2.__version__)
+import snapatac2 as sa2
+print(sa2.__version__)
 
 a = snakemake.output
 print(type(a))

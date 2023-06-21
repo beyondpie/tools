@@ -37,7 +37,7 @@ rule pre:
         ppn = lambda wildcards: myppn[wildcards.s],
         walltime=getwt
     conda:
-        "sa2dev"
+        "sa2"
     log:
         "log/{s}.log"
     script:

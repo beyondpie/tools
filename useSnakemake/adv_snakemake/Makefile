@@ -13,7 +13,7 @@ debug : demo Snakefile
 	cp config.yaml $</config.yaml
 	cp pre.py $</pre.py
 	cp $(word 2,$^) $</Snakefile
-	cd $< && ${snakemake} \
+	cd $< && ${snakemake} --use-conda \
      -c 1 -p --snakefile Snakefile -R --rerun-incomplete --skip-script-cleanup
 
 
