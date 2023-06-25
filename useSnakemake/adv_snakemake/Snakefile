@@ -29,8 +29,8 @@ rule pre:
         # snakemake will run s=a and s=b in parallel if possible
         # touch will be automatically  generate the flag file
         # once the rule is done.
-        touch("flag/pre_{s}.done"),
-        touch("flag/pre_{s}_out2.done")
+        a1 = touch("flag/pre_{s}.done"),
+        a2 = touch("flag/pre_{s}_out2.done")
     params:
         knn = knn_params
     resources:

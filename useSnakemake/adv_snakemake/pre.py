@@ -6,6 +6,8 @@ print(type(a))
 print(a)
 print(snakemake.output[0])
 
+print(type(snakemake.output['a1']))
+
 b = snakemake.params
 print(type(b))
 print(b)
