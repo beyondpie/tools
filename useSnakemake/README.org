@@ -83,7 +83,7 @@
 - core resources will be calculated *once* we submit jobs
 - time resources will be *re-estimated*
 - $250 (10K SUs):
-  - 1 SU ~ $0.025, 400 SUs ~ $1, 2K SUs ~ Starbuck coffee
+  - 1 SU ~ $0.025; 40 SUs ~ $1; 200 SUs ~ Starbuck coffee
 *** how to check money left:
 - =gbalance -u [user name]=
 - add one line ~alias mymoney="gbalance -u [user name]"~ into your
