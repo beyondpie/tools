@@ -50,10 +50,10 @@
 - when you submit jobs (either interactive or not) with *qsub*
 - [[https://www.sdsc.edu/services/hpc/tscc/condo_details.html][TSCC condo program]]
   - CPU Nodes:
-    - 2[Not sure]*18 cores, 256GB RAM in toal (7GB/core)
-    - 2[Not sure]*32 cores, 1TB RAM in total (15GB/core)
+    - 2 CPUs * 18 cores/CPU, 256GB RAM in toal (so 7GB/core for 36 cores in total)
+    - 2 CPUs * 32 cores/CPU, 1TB RAM in total (so 15GB/core for 64 cores in total)
   - GPU Nodes:
-    - CPU model: 2[Not sure]*32 cores, 256GB RAM in total (15GB/core)
+    - CPU model: 2 CPUs *32 cores/CPU, 256GB RAM in total (15GB/core)
     - NVIDIA Ampere A100, 40GB GRAM
 *** Data-intensive nodes:
 - named with *dm1*
