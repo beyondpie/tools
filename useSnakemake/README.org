@@ -54,7 +54,7 @@
     - The Plantinum node: 2 CPUs * 32 cores/CPU, 1TB RAM in total (so 15GB/core for 64 cores in total)
     - nodes=1:ppn=16:icelake:mem1024
       - will start your job with 16 CPU cores on the Platinum node (i.e., with 1TB mem)
-      - only condo / home queue can use this
+      - only condo / home / glean / gpu-condo queue can use this
         - condo has 8 hours limitation.
         - home means the nodes we purchase
     - hotel nodes are not the Plantinum/Gold nodes
