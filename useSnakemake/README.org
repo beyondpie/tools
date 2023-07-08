@@ -57,6 +57,7 @@
       - only condo / home / glean / gpu-condo queue can use this
         - condo has 8 hours limitation.
         - home means the nodes we purchase
+       - this is not ask for 1024 GB RAM, but to locate icelake with 1024GB node.
     - hotel nodes are not the Plantinum/Gold nodes
   - GPU Nodes:
     - CPU model: 2 CPUs *32 cores/CPU, 256GB RAM in total (15GB/core)
