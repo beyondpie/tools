@@ -52,6 +52,8 @@
   - CPU Nodes:
     - 2 CPUs * 18 cores/CPU, 256GB RAM in toal (so 7GB/core for 36 cores in total)
     - 2 CPUs * 32 cores/CPU, 1TB RAM in total (so 15GB/core for 64 cores in total)
+    - nodes=1:ppn=16:icelake:mem1024
+      - will start your job with 16 CPU cores on the platinum node (i.e., with 1TB mem)
   - GPU Nodes:
     - CPU model: 2 CPUs *32 cores/CPU, 256GB RAM in total (15GB/core)
     - NVIDIA Ampere A100, 40GB GRAM
