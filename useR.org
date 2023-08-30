@@ -1,32 +1,5 @@
-* use_R_strictly
-
-  R is easy to use at first. I use it a lot, but begin to hate it a
-  little bit when I use Python. The reason is simple: it's not precise
-  from a programmer view.
-  - The error information often points to the wrong places and not
-    helpfull at all. =traceback()= helps sometimes, but still not enough.
-  - When I use =library("some package")=, the function names will
-    pollute the whole namespace. When reading the codes, it's really
-    hard to know where this function comes from at a first glance.
-    I indeed miss the =import= in Python, which is simple but precise.
-  - It lacks of a simple module system. When I write some utilities in
-    a script, I can only use =source("the name of the script")= to add
-    it to another script, which again pollute the namespace in my
-    current workspace.
-
-  But R indeed has lots of great features I love:
-  - The data structures: list, data.frame, matrix, vector, factor and
-    so on. They are just easy to use, and supporved by lots of usefull
-    functions. Pandas in python is good but not that good as the data
-    structures in R.
-  - R graphic tools!
-  - Writing R packages is easy and the generated document is great!
-  - Lots of professional statistical packages.
-  
-
-  In this repository, I will summarize my experience on using R
-  strictly.
-
+* Use R
+** Use `:::` to access all the names in a package, even internal
 ** Use conda to control the virtual enviroment in R.
 
    Conda is widely used to control vitural enviroment in Python. But
