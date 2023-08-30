@@ -1,5 +1,6 @@
 * Use R
 ** Use =:::= to access all the names in a package, even internal
+   - See details from this [[https://www.tidyverse.org/blog/2022/09/playing-on-the-same-team-as-your-dependecy/][reference]]
 ** Use conda to control the virtual enviroment in R.
 
    Conda is widely used to control vitural enviroment in Python. But
