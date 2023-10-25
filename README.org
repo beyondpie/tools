@@ -3,3 +3,4 @@
 ** UCSD TSCC Introduction and Snakemake: see [[file:useSnakemake/README.org][useSnakemake]]
 ** Emacs: see [[https://github.com/beyondpie/.emacs.d][my emacs config]]
 ** dotfiles: [[file:dotfiles][see dotfiles]] 
+** Git and Github: [[https://git-scm.com/book/en/v2][gitpro]]. Typically, 1-3 chapters should be enough to use git regularly.
