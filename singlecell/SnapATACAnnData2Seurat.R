@@ -1,10 +1,6 @@
 #!/usr/bin/env Rscript
 Sys.setenv("_R_USE_PIPEBIND_" = TRUE)
 
-library(BPCells)
-library(Seurat)
-library(purrr)
-
 import::from(.from = optparse, add_option,
   OptionParser, add_option, parse_args)
 import::from(.from = stringr, str_glue)
