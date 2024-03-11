@@ -2,15 +2,17 @@
 
 library(Matrix)
 options(future.globals.maxSize = 5e9)
-library(ggplot)
+library(ggplot2)
 
 import::from(.from = optparse, make_option,
   OptionParser, add_option, parse_args)
 import::from(.from = stringr, str_glue)
 import::from(.from = dplyr, group_by, slice_sample)
 import::from(.from = Seurat, VariableFeatures,
-  `VariableFeatures<-`, FindTransferAnchors,
-  TransferData)
+  `VariableFeatures<-`,
+  FindVariableFeatures,
+  FindTransferAnchors,
+  TransferData, DefaultAssay)
 
 # This script is to provide a unified transfer label module
 # - Only works for two dataset at one time
@@ -65,40 +67,71 @@ args <- OptionParser() |>
     default = "cca",
     help = "method for transfer label") |>
   add_option(opt_str = c("-k", "--kanchor"), type = "integer",
+    defautl = 5,
     help = "kanchor for finding anchors") |>
   add_option(opt_str = c("-p", "--npca"), type = "integer",
     default = 50, help = "# of components for finding anchors") |>
   add_option(opt_str = c("-t", "--tfcol"), type = "character",
     help = "on which col of ref we transfer labels to query.") |>
-  add_option(opt_str = c("--ordcolref"), type = "character",
-    help = "ordered cols of ref for consensus matrix plot.") |>
-  add_option(opt_str = c("--ordcolquery"), type = "character",
-    help = "ordered cols of query for consensus matrix plot.") |>
-  add_option(opt_str = c("--ecref"), type = "character",
-    default = NULL,
-    help = "extra col in ref for consensus matrix plot.") |>
-  add_option(opt_str = c("--ecquery"), type = "character",
-    default = NULL,
-    help = "extra col in query for consensus matrix plot.") |>
-  add_option(opt_str = c("--ordecref"), type = "character",
-    default = NULL,
-    help = "ordered extra cols of ref.") |>
-  add_option(opt_str = c("--ordecquery"), type = "character",
-    default = NULL,
-    help = "ordered extra cols of query.") |>
-  add_option(opt_str = c("--pltcoembed"), type = "logical",
-    action = "store_true", default = FALSE,
-    help = "if plot coembedding on two datasets.") |>
+    add_option(opt_str = c("--ordcolref"), type = "character",
+      help = "ordered cols of ref for consensus matrix plot.") |>
+    add_option(opt_str = c("--ordcolquery"), type = "character",
+      help = "ordered cols of query for consensus matrix plot.") |>
+    add_option(opt_str = c("--ecref"), type = "character",
+      default = NULL,
+      help = "extra col in ref for consensus matrix plot.") |>
+    add_option(opt_str = c("--ecquery"), type = "character",
+      default = NULL,
+      help = "extra col in query for consensus matrix plot.") |>
+    add_option(opt_str = c("--ordecref"), type = "character",
+      default = NULL,
+      help = "ordered extra cols of ref.") |>
+    add_option(opt_str = c("--ordecquery"), type = "character",
+      default = NULL,
+      help = "ordered extra cols of query.") |>
+    add_option(opt_str = c("--pltcoembed"), type = "logical",
+      action = "store_true", default = FALSE,
+      help = "if plot coembedding on two datasets.") |>
   parse_args(object = _)
+
+# * DEBUG
+
+datadir <- file.path("~/git-recipes/mouseBrainAtlas",
+  "amb_pairedtag", "03.integration", "src/test/resource")
+args$ref <- file.path(datadir, "allen_ref.rds")
+args$query <- file.path(datadir, "pt_query.rds")
+args$tfcol <- "cl"
+args$outdir <- datadir
+args$downsample <- TRUE
+args$dcolref <- "cl"
+args$dcolquery <- "L3"
+args$useref <- TRUE
+args$saveanchor <- TRUE
+args$kanchor <- 50
 
 # * set up inputs
 eps <- 1e-6
+# pretty slow
+getVarGenes <- function(s5) {
+  m <- s5@assays$RNA@layers$counts
+  vapply(seq_len(nrow(m)), \(i) {
+    (max(m[i, ]) - min(m[i, ])) > eps
+  }, TRUE) |>
+    x => rownames(s5)[x]
+}
+
+getNoZeroCountGene <- function(s5) {
+  m <- s5@assays$RNA@layers$counts
+  rownames(s5)[rowSums(m) > eps]
+}
+
 message("Run Seurat Transfer Label.")
 ref <- readRDS(args$ref)
-genes_ref <- rownames(ref)
-genes_ref_var <- (apply(ref, 1, max) - apply(ref, 1, min)) |>
-  x => x > eps |>
-  x => genes_ref[x]
+genes_ref_var <- getNoZeroCountGene(ref)
+
+if (is.null(args$tfcol)) {
+  stop("error: transfer col is NULL.")
+}
 if (!args$tfcol %in% colnames(ref@meta.data)) {
   stop(str_glue("error: {args$tfcol} is not in ref meta data."))
 }
@@ -109,21 +142,14 @@ if ((!is.null(args$extrpltcol)) && (
 }
 
 query <- readRDS(args$query)
-genes_query <- rownames(query)
-genes_query_var <- (apply(query, 1, max) - apply(query, 1, min)) |>
-  x => x > eps |>
-  x => genes_query[x]
+genes_query_var <- getNoZeroCountGene(query)
 
 genes_all <- intersect(genes_ref_var, genes_query_var)
-message(str_glue("var {length(genes_ref_var)} genes ",
-  "| {length(genes_ref) genes from ref}, ",
-  "var {length(genes_query_var)} genes ",
-  "| {length(genes_query)} genes from query, ",
-  "{length(genes_all)} genes from both."))
+message(str_glue("{length(genes_all)} genes from both."))
 ref <- ref[genes_all, ] |>
   Seurat::NormalizeData(object = _)
 query <- query[genes_all, ] |>
-  Seurat::NormalizeData(obejct = _)
+  Seurat::NormalizeData(object = _)
 rqlist <- list(ref = ref, query = query)
 rm(ref, query)
 
@@ -137,13 +163,15 @@ if (args$downsample) {
   rqlist2 <- lapply(names(rqlist), \(nm) {
     message(str_glue("Perform downsampling on {nm}."))
     s <- rqlist[[nm]]
-    clusters <- s[[paste0("dcol", nm)]]
+    clusters <- s@meta.data[[
+      args[[paste0("dcol", nm)]]
+    ]]
     ntotal <- ncol(s)
     ncl <- length(table(clusters))
-    nallow <- args[[paste0("n", nm)]]
+    nallow <- min(ntotal, args[[paste0("n", nm)]])
     nd <- args[[paste0("nd", nm)]] |>
       x => ifelse(test = is.null(x),
-        floor(min(ntotal, nallow) / ncl), x)
+        floor(nallow / ncl), x)
     message(str_glue("In total, {ntotal} cells and {ncl} d-clusters."))
     message(str_glue("Downsample {nd} per cluster",
       " and {nallow} cells at most."))
@@ -153,11 +181,13 @@ if (args$downsample) {
       group_by(cluster) |>
       slice_sample(n = nd) |>
       x => x$barcode
-    s[, x]
+    message(str_glue("{length(barcodes)} barcodes are kept."))
+    s[, barcodes]
   })
 } else {
   rqlist2 <- rqlist
 }
+names(rqlist2) <- names(rqlist)
 rm(rqlist)
 
 # * set up features
@@ -169,7 +199,7 @@ if (!is.null(args$feature)) {
   VariableFeatures(rqlist2$ref) <- features
   VariableFeatures(rqlist2$query) <- features
 } else {
-  nvar <- options$nvar
+  nvar <- args$nvar
   message(str_glue("Finding {nvar} variable features."))
   rqlist2$ref <- FindVariableFeatures(
     object = rqlist2$ref,
@@ -183,20 +213,20 @@ if (!is.null(args$feature)) {
     nfeatures = nvar
   )
   fea_query <- VariableFeatures(rqlist2$query)
-  if (args$use_ref && (!args$use_query)) {
+  if (args$useref && (!args$usequery)) {
     message("use features from REF Variable features.")
     features <- fea_ref
   }
-  if (args$use_ref && args$use_query) {
+  if (args$useref && args$usequery) {
     message("use features from BOTH Variable features.")
     features <- intersect(fea_ref, fea_query)
     message(str_glue("{length(features)} features used."))
   }
-  if ((!args$use_ref) && args$use_query) {
+  if ((!args$useref) && args$usequery) {
     message("use features from QUERY Variable features.")
     features <- use_query
   }
-  if ((!args$use_ref) && (!args$use_query)) {
+  if ((!args$useref) && (!args$usequery)) {
     message("use features from BOTH features.")
     features <- genes_all
   }
@@ -235,7 +265,7 @@ if (file.exists(anchorfnm)) {
 message("Then transfer labels in single-cell level.")
 rqlist2$query <- TransferData(
   anchorset = anchors,
-  refdata = rqlist2$ref[[args$tfcol]],
+  refdata = rqlist2$ref@meta.data[[args$tfcol]],
   reference = NULL,
   query = rqlist2$query,
   weight.reduction = ifelse(
