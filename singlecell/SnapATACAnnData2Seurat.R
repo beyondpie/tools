@@ -62,12 +62,12 @@ args$nmax <- 5000
 args$downsample <- FALSE
 args$conda <- "~/mambaforge/bin/mamba"
 args$condaenv <- "sa2"
+args$useBPCells <- TRUE
 
 # * functions
 tos <- function(ann,
                 outdir,
-                meta = NULL,
-                assay = "RNA") {
+                meta = NULL) {
   if (!is.null(meta)) {
     message("Cellmeta is not NULL, will save is to seurat too.")
     if (!all(rownames(meta) == colnames(mat))) {
@@ -83,13 +83,16 @@ tos <- function(ann,
   mat <- t(ann$X)
   rownames(mat) <- ann$var_names$to_list()
   colnames(mat) <- ann$obs_names$to_list()
+  mat <- MatrixExtra::as.csc.matrix(x = mat) |>
+    BPCells::convert_matrix_type(matrix = _, type = "uint32_t")
+  ann_meta <- ann$obs |>
+    x => `rownames<-`(x, colnames(mat))
+  ann_meta$barcode <- rownames(ann_meta)
   if (!is.null(meta)) {
-    s5 <- Seurat::CreateSeuratObject(counts = mat,
-      assay = assay, meta.data = meta)
-  } else {
-    s5 <- Seurat::CreateSeuratObject(counts = mat,
-      assay = assay)
+    ann_meta <- merge(ann_meta, meta, by = "barcode") |>
+      x => `rownames<-`(x, x$barcode)
   }
+  s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
   outs5file <- file.path(outdir, "anns5.rds")
   message("Save Seurat to ", outs5file)
   saveRDS(s5, outs5file)
@@ -98,8 +101,7 @@ tos <- function(ann,
 
 tos5 <- function(ann,
                  outdir,
-                 meta = NULL,
-                 assay = "RNA") {
+                 meta = NULL) {
   if (!is.null(meta)) {
     message("Cellmeta is not NULL, will save it to seurat too.")
     if (!all(rownames(meta) == colnames(mat))) {
@@ -119,18 +121,19 @@ tos5 <- function(ann,
   colnames(mat) <- ann$obs_names$to_list()
   message("Save counts to ", outs5matdir, " with BPCells.")
   MatrixExtra::as.csc.matrix(x = mat) |>
-    BPCells::convert_matrix_type(matrix = _, type = "uinit32_t") |>
+    BPCells::convert_matrix_type(matrix = _, type = "uint32_t") |>
     BPCells::write_matrix_dir(mat = _, dir = outs5matdir,
       overwrite = TRUE)
   d <- BPCells::open_matrix_dir(outs5matdir)
+  ann_meta <- ann$obs |>
+    x => `rownames<-`(x, colnames(mat))
+  ann_meta$barcode <- rownames(ann_meta)
   if (!is.null(meta)) {
-    s5 <- Seurat::CreateSeuratObject(counts = d,
-      assay = assay, meta.data = meta)
-  } else {
-    s5 <- Seurat::CreateSeuratObject(counts = d,
-      assay = assay)
+    ann_meta <- merge(ann_meta, meta, by = "barcode") |>
+      x => `rownames<-`(x, x$barcode)
   }
-  outs5file <- file.path(outdir, "anns5.rds")
+  s5 <- Seurat::CreateSeuratObject(counts = d, meta.data = ann_meta)
+  outs5file <- file.path(outdir, "anns5.BPCells.rds")
   message("Save Seurat to ", outs5file)
   saveRDS(s5, outs5file)
   message("Seurat object saved.")
@@ -161,6 +164,9 @@ if (!is.null(args$sa2meta)) {
     file = args$sa2meta, sep = ",",
     header = TRUE, data.table = FALSE
   ) |> x => `rownames<-`(x, x[[args$keycol]])
+  if (args$keycol != "barcode") {
+    meta$barcode <- meta[[args$keycol]]
+  }
 }
 
 if ((!args$downsample) || (raw_ann$n_obs <= args$nmax)) {
@@ -204,10 +210,10 @@ local({
   sub_meta <- meta[barcodes, ]
   if (args$useBPCells) {
     tos5(ann = sub_ann, outdir = args$outdir,
-      meta = sub_meta, assay = "RNA")
+      meta = sub_meta)
   } else {
     tos(ann = sub_ann, outdir = args$outdir,
-      meta = sub_meta, assay = "RNA")
+      meta = sub_meta)
   }
 })
 message("Quit the script. Good Luck!")
