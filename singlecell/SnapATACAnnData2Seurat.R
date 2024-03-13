@@ -1,141 +1,171 @@
 #!/usr/bin/env Rscript
 Sys.setenv("_R_USE_PIPEBIND_" = TRUE)
-
-import::from(.from = optparse, add_option,
+# use for transpose of sparse matrix.
+library(Matrix)
+import::from(.from = optparse,
   OptionParser, add_option, parse_args)
 import::from(.from = stringr, str_glue)
 
-# Transform SnapATAC2 AnnObject to Seurat v5 object.
-# NOTE:
-# - R version >= 4.2
-# - Seurat version >= 5.0
-# - python version >= 3.8
-# - Python package: snapatac2
-
 # * set up arguments
-args <- OptionParser() |>
+args <- OptionParser(usage = "Transform SnapATAC2 AnnData to Seurat v5 R object.",
+  description = "
+
+ NOTE:
+ - R version >= 4.0
+ - Seurat version >= 5.0
+ - SnapATAC2 >= 2.4
+
+ Usage examples
+ 0. Get help
+    Rscript SnapATACAnnData2Seurat.R -h
+ 1. Directly transform without downsampling:
+    - a file under [outdir]/anns5.rds
+    Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir]
+ 2. Using BPCells in Seurat5
+    - a file under [outdir]/anns5.BPCells.rds
+    Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir] --useBPCells
+ 3. Set python conda env to have SnapATAC2
+    Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir] \
+                             --conda [conda_path/bin/conda] --condaenv [env]
+ 4. Downsampling based on a column from a cell meta file
+    Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir] --downsample \
+                             -k barcode --dscol [cluster_col] --nds 50\
+ 5. Downsampling to a given number of cells.
+    Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir] --downsample \
+                             -k barcode -n 40000") |>
   add_option(opt_str = c("-f", "--sa2fnm"),
     type = "character", help = "snapatac2 AnnData file") |>
   add_option(opt_str = c("-o", "--outdir"),
     type = "character", help = "seurat outdir") |>
   add_option(opt_str = c("--conda"),
-    type = "character", help = "conda binary path") |>
+    type = "character", help = "conda binary path, default NULL") |>
   add_option(opt_str = c("--condaenv"),
     type = "character", default = NULL,
-    help = "conda env for snapatac2") |>
+    help = "conda env for snapatac2, default NULL") |>
   add_option(opt_str = c("-m", "--sa2meta"),
     type = "character", default = NULL,
-    help = "meta data file, csv format") |>
+    help = "meta data file, csv format, default NULL") |>
   add_option(opt_str = c("--useBPCells"),
     type = "logical", default = FALSE,
     action = "store_true",
-    help = "if using BPCells for large mat") |>
+    help = "if using BPCells for large mat, default FALSE") |>
   add_option(opt_str = c("-d", "--downsample"),
     type = "logical", default = FALSE, action = "store_true",
-    help = "if need to downsampling before transform") |>
+    help = "if need to downsampling before transform, default FALSE") |>
   add_option(opt_str = c("-k", "--keycol"),
     type = "character", default = "barcode",
-    help = "column of barcode in sa2meta") |>
+    help = "column of barcode in sa2meta, default barcode") |>
   add_option(opt_str = c("--dscol"),
     type = "character", default = NULL,
-    help = "on which sa2meta column for downsample") |>
+    help = "on which sa2meta column for downsample, default NULL") |>
   add_option(opt_str = c("--nds"), type = "integer",
-    default = 50, help = "# of cells per group for downsample") |>
+    default = 50, help = "# of cells per group for downsample, defaualt 50") |>
   add_option(opt_str = c("-n", "--nmax"), type = "integer",
-    default = 200000, help = "# cells at most") |>
+    default = 200000, help = "# cells at most, default 200000") |>
   parse_args(object = _)
 
-# * DEBUG
-datadir <- file.path("/Users/szu/git-recipes/mouseBrainAtlas",
-  "amb_pairedtag", "03.integration", "src/test/resource")
-args$sa2fnm <- file.path(datadir, "sa2ann_test.h5ad")
-args$outdir <- datadir
-args$sa2meta <- file.path(datadir, "sa2ann_cellmeta.csv")
-args$keycol <- "barcode"
-args$dscol <- "brainregion"
-args$nds <- 50
-args$nmax <- 5000
-args$downsample <- FALSE
-args$conda <- "~/mambaforge/bin/mamba"
-args$condaenv <- "sa2"
-args$useBPCells <- TRUE
+## # * DEBUG
+## datadir <- file.path("/projects/ps-renlab2/szu/projects",
+##   "amb_pairedtag", "03.integration", "src/test/resource")
+## args$sa2fnm <- file.path(datadir, "sa2ann_test.h5ad")
+## args$outdir <- datadir
+## args$sa2meta <- file.path(datadir, "sa2ann_cellmeta.csv")
+## args$keycol <- "barcode"
+## args$dscol <- "brainregion"
+## args$nds <- 50
+## args$nmax <- 5000
+## args$downsample <- FALSE
+## args$conda <- "~/miniforge3/bin/mamba"
+## args$condaenv <- "sa2"
+## args$useBPCells <- TRUE
 
 # * functions
-tos <- function(ann,
-                outdir,
-                meta = NULL) {
+getBarcodeFromAnn <- function(ann, backed = 'r') {
+  if (backed == 'r') {
+    barcode_ann <- ann$obs_names
+  } else {
+    barcode_ann <- ann$obs_names$to_list()
+  }
+  return(barcode_ann)
+}
+
+getFeatureFromAnn <- function(ann, backed = 'r') {
+  if (backed == 'r') {
+    r <- ann$var_names
+  } else {
+    r <- ann$var_names$to_list()
+  }
+  return(r)
+}
+
+checkMeta <- function(ann, meta, backed = 'r') {
+  r <- meta
+  barcode_ann <- getBarcodeFromAnn(ann, backed)
+  if(nrow(meta) > length(barcode_ann)) {
+    message("More barcodes in meta than in ann.")
+    message("Only consider the ones in ann.")
+    if (!all(barcode_ann %in% rownames(meta))) {
+      stop("Some barcodes are not in the meta.")
+    }
+    r <- meta[barcode_ann, ]
+  }
+  if (nrow(meta <= length(barcode_ann))) {
+    if(!all(rownames(meta) %in% barcode_ann)) {
+      stop("Some barcodes in meta are not in the ann.")
+    }
+  }
+  return(r)
+}
+tos5 <- function(ann,
+                 outdir,
+                 backed = 'r',
+                meta = NULL,
+                saveAsBPCells = FALSE) {
+  barcode_ann <- getBarcodeFromAnn(ann, backed)
+  features_ann <- getFeatureFromAnn(ann, backed)
   if (!is.null(meta)) {
     message("Cellmeta is not NULL, will save is to seurat too.")
-    if (!all(rownames(meta) == colnames(mat))) {
+    if (!all(rownames(meta) == barcode_ann)) {
       stop("meta and seurat barcodes are not matched.")
     }
   }
-  dir.create(outdir, showWarnings = TRUE)
+  dir.create(outdir, showWarnings = FALSE)
   outs5file <- file.path(outdir, "anns5.rds")
   message("Transform snapatac2 anndaata to Seurat",
     " with MatrixExtra package.")
   message("Treat X from ann as count, and force it to integer.")
   # ann and seurat rows are different.
   mat <- t(ann$X)
-  rownames(mat) <- ann$var_names$to_list()
-  colnames(mat) <- ann$obs_names$to_list()
+  rownames(mat) <- features_ann
+  colnames(mat) <- barcode_ann
   mat <- MatrixExtra::as.csc.matrix(x = mat) |>
     BPCells::convert_matrix_type(matrix = _, type = "uint32_t")
+  if (saveAsBPCells) {
+    message("counts will be saved under ",
+      file.path(outdir, "_mat"), " using BPCells.")
+    outs5matdir <- file.path(outdir, "_mat")
+    dir.create(outs5matdir, showWarnings = FALSE)
+    outs5file <- file.path(outdir, "anns5.BPCells.rds")
+    BPCells::write_matrix_dir(mat = mat, outs5matdir,
+      overwrite = TRUE)
+    mat <- BPCells::open_matrix_dir(outs5matdir)
+  }
   ann_meta <- ann$obs |>
     x => `rownames<-`(x, colnames(mat))
   ann_meta$barcode <- rownames(ann_meta)
   if (!is.null(meta)) {
     ann_meta <- merge(ann_meta, meta, by = "barcode") |>
-      x => `rownames<-`(x, x$barcode)
+      x => `rownames<-`(x, x$barcode) |>
+      x => x[rownames(mat), ]
   }
   s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
-  outs5file <- file.path(outdir, "anns5.rds")
-  message("Save Seurat to ", outs5file)
-  saveRDS(s5, outs5file)
-  message("Seurat object saved.")
-}
-
-tos5 <- function(ann,
-                 outdir,
-                 meta = NULL) {
-  if (!is.null(meta)) {
-    message("Cellmeta is not NULL, will save it to seurat too.")
-    if (!all(rownames(meta) == colnames(mat))) {
-      stop("meta and seurat barcodes are not matched.")
-    }
-  }
-  dir.create(outdir, showWarnings = TRUE)
-  outs5matdir <- file.path(outdir, "_mat")
-  dir.create(outs5matdir, showWarnings = TRUE)
-  outs5file <- file.path(outdir, "anns5.rds")
-  message("Transform snapatac2 anndaata to Seurat5",
-    " with BPCells and MatrixExtra package.")
-  message("Treat X from ann as count, and force it to integer.")
-  # ann and seurat rows are different.
-  mat <- t(ann$X)
-  rownames(mat) <- ann$var_names$to_list()
-  colnames(mat) <- ann$obs_names$to_list()
-  message("Save counts to ", outs5matdir, " with BPCells.")
-  MatrixExtra::as.csc.matrix(x = mat) |>
-    BPCells::convert_matrix_type(matrix = _, type = "uint32_t") |>
-    BPCells::write_matrix_dir(mat = _, dir = outs5matdir,
-      overwrite = TRUE)
-  d <- BPCells::open_matrix_dir(outs5matdir)
-  ann_meta <- ann$obs |>
-    x => `rownames<-`(x, colnames(mat))
-  ann_meta$barcode <- rownames(ann_meta)
-  if (!is.null(meta)) {
-    ann_meta <- merge(ann_meta, meta, by = "barcode") |>
-      x => `rownames<-`(x, x$barcode)
-  }
-  s5 <- Seurat::CreateSeuratObject(counts = d, meta.data = ann_meta)
-  outs5file <- file.path(outdir, "anns5.BPCells.rds")
   message("Save Seurat to ", outs5file)
   saveRDS(s5, outs5file)
   message("Seurat object saved.")
 }
 
 # * main
+
 if (!is.null(args$conda)) {
   message("Using reticulate to setup conda: ",
     args$conda)
@@ -148,9 +178,6 @@ if (!is.null(args$conda)) {
     required = TRUE)
 }
 sa2 <- reticulate::import(module = "snapatac2")
-message("load SnapATAC2 anndata file: ",
-  args$sa2fnm)
-raw_ann <- sa2$read(filename = args$sa2fnm, backed = "r")
 
 meta <- NULL
 if (!is.null(args$sa2meta)) {
@@ -161,29 +188,33 @@ if (!is.null(args$sa2meta)) {
     header = TRUE, data.table = FALSE
   ) |> x => `rownames<-`(x, x[[args$keycol]])
   if (args$keycol != "barcode") {
+    message("keycol from meta is not barcode.")
+    message("Then add barcode column in the meta.")
     meta$barcode <- meta[[args$keycol]]
   }
 }
 
-if ((!args$downsample) || (raw_ann$n_obs <= args$nmax)) {
+if (!args$downsample) {
   message("Transform ann to seurat without dowmsample")
-  # read to memory
+  message("load SnapATAC2 anndata file: ",
+    args$sa2fnm, " into memory.")
   raw_ann <- sa2$read(filename = args$sa2fnm, backed = NULL)
-  if (args$useBPCells) {
-    tos5(ann = raw_ann, outdir = args$outdir,
-      meta = meta, assay = "RNA")
-  } else {
-    tos(ann = raw_ann, outdir = args$outdir,
-      meta = meta, assay = "RNA")
-  }
+  meta <- checkMeta(raw_ann, meta, backed = 'm')
+  tos5(ann = raw_ann, outdir = args$outdir, meta = meta,
+    saveAsBPCells = args$useBPCells, backed = 'm')
   message("Quit the script. Good Luck!")
   quit(save = "no", status = 0, )
 }
 
+message("load SnapATAC2 anndata file: ",
+  args$sa2fnm, " in read-only mode.")
+raw_ann <- sa2$read(filename = args$sa2fnm, backed = "r")
+meta <- checkMeta(raw_ann, meta, backed = 'r')
+
 if (is.null(args$dscol) || is.null(meta)) {
   message("Downsample before transform.")
   message(str_glue("Downsample to {args$nmax} barcodes."))
-  barcodes <- sample(raw_ann$obs_names,
+  barcodes <- sample(getBarcodeFromAnn(raw_ann, backed = 'r'),
     size = args$nmax, replace = FALSE)
 } else {
   message(str_glue("Downsample based on {args$dscol} col in meta."))
@@ -200,16 +231,12 @@ local({
     fileext = ".h5ad"
   )
   message(str_glue("save subset of ann to tmp file: {tmpf}."))
+  message("The tmp file will be deleted at end.")
   sub_ann <- raw_ann$subset(obs_indices = barcodes,
     out = tmpf)
   sub_ann <- sub_ann$to_memory()
   sub_meta <- meta[barcodes, ]
-  if (args$useBPCells) {
-    tos5(ann = sub_ann, outdir = args$outdir,
-      meta = sub_meta)
-  } else {
-    tos(ann = sub_ann, outdir = args$outdir,
-      meta = sub_meta)
-  }
+  tos5(ann = sub_ann, outdir = args$outdir, meta = sub_meta,
+    saveAsBPCells = args$useBPCells, backed = 'm')
 })
 message("Quit the script. Good Luck!")
