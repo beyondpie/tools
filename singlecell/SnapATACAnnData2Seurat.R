@@ -156,7 +156,7 @@ tos5 <- function(ann,
   if (!is.null(meta)) {
     ann_meta <- merge(ann_meta, meta, by = "barcode") |>
       x => `rownames<-`(x, x$barcode) |>
-      x => x[rownames(mat), ]
+      x => x[colnames(mat), ]
   }
   s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
   message("Save Seurat to ", outs5file)
