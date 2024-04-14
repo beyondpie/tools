@@ -95,19 +95,18 @@ args <- OptionParser() |>
   parse_args(object = _)
 
 # * DEBUG
-
-datadir <- file.path("~/git-recipes/mouseBrainAtlas",
-  "amb_pairedtag", "03.integration", "src/test/resource")
-args$ref <- file.path(datadir, "allen_ref.rds")
-args$query <- file.path(datadir, "pt_query.rds")
-args$tfcol <- "cl"
-args$outdir <- datadir
-args$downsample <- TRUE
-args$dcolref <- "cl"
-args$dcolquery <- "L3"
-args$useref <- TRUE
-args$saveanchor <- TRUE
-args$kanchor <- 50
+## datadir <- file.path("~/git-recipes/mouseBrainAtlas",
+##   "amb_pairedtag", "03.integration", "src/test/resource")
+## args$ref <- file.path(datadir, "allen_ref.rds")
+## args$query <- file.path(datadir, "pt_query.rds")
+## args$tfcol <- "cl"
+## args$outdir <- datadir
+## args$downsample <- TRUE
+## args$dcolref <- "cl"
+## args$dcolquery <- "L3"
+## args$useref <- TRUE
+## args$saveanchor <- TRUE
+## args$kanchor <- 50
 
 # * set up inputs
 eps <- 1e-6
