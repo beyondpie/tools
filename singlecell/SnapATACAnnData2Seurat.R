@@ -29,10 +29,12 @@ args <- OptionParser(usage = "Transform SnapATAC2 AnnData to Seurat v5 R object.
                              --conda [conda_path/bin/conda] --condaenv [env]
  4. Downsampling based on a column from a cell meta file
     Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir] --downsample \
-                             -k barcode --dscol [cluster_col] --nds 50\
+                             -k [barcode_col] --dscol [cluster_col] --nds 50 \
+                             -m [cellmetafile]
  5. Downsampling to a given number of cells.
     Rscript SnapATACAnnData2Seurat.R -f [input.h5ad] -o [outdir] --downsample \
-                             -k barcode -n 40000") |>
+                             -k barcode -n 40000"
+) |>
   add_option(opt_str = c("-f", "--sa2fnm"),
     type = "character", help = "snapatac2 AnnData file") |>
   add_option(opt_str = c("-o", "--outdir"),
