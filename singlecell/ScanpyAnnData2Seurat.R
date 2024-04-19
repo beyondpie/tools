@@ -59,32 +59,38 @@ args <- OptionParser(usage = "Transform Scanpy AnnData to Seurat v5 R object.",
   parse_args(object = _)
 
 ## # * DEBUG
-## datadir <- file.path("/projects/ps-renlab2/szu/projects",
+## datadir <- file.path("/tscc/projects/ps-renlab2/szu/projects/",
 ##   "amb_pairedtag", "03.integration", "src/test/resource")
-## args$annfnm <- file.path(datadir, "ann_test.h5ad")
-## args$outfnm <- datadir
-## args$dscol <- "brainregion"
+## args$annfnm <- file.path(datadir, "scanpy_ann.h5ad")
+## args$outfnm <- file.path(datadir, "sc.ann2seurat.rds")
+## args$dscol <- "sex"
 ## args$nds <- 50
-## args$nmax <- 5000
+## args$nmax <- 100
 ## args$downsample <- FALSE
-## args$conda <- "~/miniforge3/bin/mamba"
+## args$conda <- "/tscc/nfs/home/szu/miniforge3/bin/conda"
 ## args$condaenv <- "sa2"
-## args$useBPCells <- TRUE
+## args$useBPCells <- FALSE
+## args$matGroup <- "layers/rawcount"
 
 # * functions
 tos5 <- function(ann,
                  outfnm,
                  matGroup = "X",
                 saveAsBPCells = FALSE) {
-  barcode_ann <- ann$obs_names
-  features_ann <- ann$var_names
+  barcode_ann <- ann$obs_names$to_list()
+  features_ann <- ann$var_names$to_list()
   outdir <- dirname(outfnm)
   dir.create(outdir, showWarnings = FALSE)
   message("Transform snapatac2 anndaata to Seurat",
     " with MatrixExtra package.")
-  message("Treat X from ann as count, and force it to integer.")
+  message("Treat ", matGroup,
+    " from ann as count, and force it to integer.")
   # ann and seurat rows are different.
-  mat <- t(ann[[matGroup]])
+  if(matGroup == "X") {
+    mat <- t(ann$X)
+  } else {
+    mat <- t(ann$layers[[gsub("layers/", "", matGroup)]])
+  }
   rownames(mat) <- features_ann
   colnames(mat) <- barcode_ann
   mat <- MatrixExtra::as.csc.matrix(x = mat) |>
@@ -119,14 +125,16 @@ if (!is.null(args$conda)) {
 }
 ad <- reticulate::import(module = "anndata")
 message("load anndata file: ", args$annfnm)
-raw_ann <- ad$read(filename = args$annfnm)
-raw_barcodes <- raw_ann$obs_names
+raw_ann <- ad$read_h5ad(filename = args$annfnm)
+raw_barcodes <- raw_ann$obs_names$to_list()
 meta <- raw_ann$obs |>
   x => `rownames<-`(x, raw_barcodes)
+meta$barcode <- rownames(meta)
 
 if (!args$downsample) {
   message("Transform ann to seurat without dowmsample.")
-  tos5(ann = raw_ann, outfnm = args$outfnm, matGroup = args$matgroup,
+  tos5(ann = raw_ann, outfnm = args$outfnm,
+    matGroup = args$matGroup,
     saveAsBPCells = args$useBPCells)
   message("Quit the script. Good Luck!")
   quit(save = "no", status = 0, )
@@ -141,20 +149,12 @@ if (is.null(args$dscol)) {
   message(str_glue("Per group: {args$nds} at most."))
   barcodes <- dplyr::group_by(.data = meta, dplyr::across(args$dscol)) |>
     dplyr::slice_sample(n = args$nds) |>
-    x => rownames(x)
+    x => x$barcode
 }
 
 message(str_glue("{length(barcodes)} barcodes are got."))
-local({
-  tmpf <- withr::local_tempfile(
-    tmpdir = tempdir(),
-    fileext = ".h5ad"
-  )
-  message(str_glue("save subset of ann to tmp file: {tmpf}."))
-  message("The tmp file will be deleted at end.")
-  sub_ann <- raw_ann[raw_barcodes %in% barcodes]$copy()
-  tos5(ann = sub_ann, outfnm = args$outfnm,
-    matGroup = args$matgorup,
-    saveAsBPCells = args$useBPCells)
-})
+sub_ann <- raw_ann[raw_barcodes %in% barcodes]$copy()
+tos5(ann = sub_ann, outfnm = args$outfnm,
+  matGroup = args$matGroup,
+  saveAsBPCells = args$useBPCells)
 message("Quit the script. Good Luck!")
