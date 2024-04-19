@@ -178,19 +178,17 @@ if (!is.null(args$conda)) {
 }
 sa2 <- reticulate::import(module = "snapatac2")
 
-meta <- NULL
-if (!is.null(args$sa2meta)) {
-  message("load SnapATAC2 meta csv file: ", args$sa2meta,
-    " with data.table.")
-  meta <- data.table::fread(
-    file = args$sa2meta, sep = ",",
-    header = TRUE, data.table = FALSE
-  ) |> x => `rownames<-`(x, x[[args$keycol]])
-  if (args$keycol != "barcode") {
-    message("keycol from meta is not barcode.")
-    message("Then add barcode column in the meta.")
-    meta$barcode <- meta[[args$keycol]]
-  }
+# meta data from outside instead of from SnapATAC2
+message("load SnapATAC2 meta csv file: ", args$sa2meta,
+  " with data.table.")
+meta <- data.table::fread(
+  file = args$sa2meta, sep = ",",
+  header = TRUE, data.table = FALSE) |>
+  x => `rownames<-`(x, x[[args$keycol]])
+if (args$keycol != "barcode") {
+  message("keycol from meta is not barcode.")
+  message("Then add barcode column in the meta.")
+  meta$barcode <- meta[[args$keycol]]
 }
 
 if (!args$downsample) {
