@@ -53,9 +53,9 @@ args <- OptionParser(usage = "Transform Scanpy AnnData to Seurat v5 R object.",
     default = 50, help = "# of cells per group for downsample, defaualt 50") |>
   add_option(opt_str = c("-n", "--nmax"), type = "integer",
     default = 200000, help = "# cells at most, default 200000") |>
-  add_option(opt_str = c("--matGroup"), type = "str",
-    default = "layers/rawcount",
-    help = "mat field, usually X, but layers/rawcount in Allen[default]") |>
+  add_option(opt_str = c("--matGroup"), type = "character",
+    default = "X",
+    help = "mat field, usually X, but layers/rawcount in Allen") |>
   parse_args(object = _)
 
 ## # * DEBUG
