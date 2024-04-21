@@ -80,21 +80,21 @@ args <- OptionParser(
   parse_args(object = _)
 
 # * DEBUG
-projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
-datadir <- file.path(
-  projdir, "03.integration", "src/test/resource"
-)
-args$ref <- file.path(datadir, "allenseu_ds.rds")
-args$query <- file.path(datadir, "ptseu_ds.rds")
-args$tfcol <- "cl"
-args$outdir <- datadir
-args$useref <- TRUE
-args$saveanchor <- TRUE
-args$kanchor <- 50
-args$method <- "cca"
-args$feature <- file.path(
-  projdir, "meta", "AIT21_k8_markers.txt"
-)
+## projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
+## datadir <- file.path(
+##   projdir, "03.integration", "src/test/resource"
+## )
+## args$ref <- file.path(datadir, "allenseu_ds.rds")
+## args$query <- file.path(datadir, "ptseu_ds.rds")
+## args$tfcol <- "cl"
+## args$outdir <- datadir
+## args$useref <- TRUE
+## args$saveanchor <- TRUE
+## args$kanchor <- 50
+## args$method <- "cca"
+## args$feature <- file.path(
+##   projdir, "meta", "AIT21_k8_markers.txt"
+## )
 
 # * set up inputs
 getNoZeroCountGene <- function(s5) {
