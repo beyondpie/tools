@@ -2,9 +2,10 @@
 Sys.setenv("_R_USE_PIPEBIND_" = TRUE)
 # use for transpose of sparse matrix.
 library(Matrix)
-import::from(.from = optparse,
-  OptionParser, add_option, parse_args)
-import::from(.from = stringr, str_glue)
+library(Seurat)
+library(BPCells)
+library(optparse)
+library(tidyverse)
 
 # * set up arguments
 args <- OptionParser(usage = "Transform Scanpy AnnData to Seurat v5 R object.",
@@ -96,13 +97,19 @@ tos5 <- function(ann,
   mat <- MatrixExtra::as.csc.matrix(x = mat) |>
     BPCells::convert_matrix_type(matrix = _, type = "uint32_t")
   if (saveAsBPCells) {
-    message("counts will be saved under ",
-      file.path(outdir, "_mat"), " using BPCells.")
+    message(
+      "counts will be saved under ",
+      file.path(outdir, "_mat"), " using BPCells."
+    )
     outs5matdir <- file.path(outdir, "_mat")
     dir.create(outs5matdir, showWarnings = FALSE)
-    BPCells::write_matrix_dir(mat = mat, outs5matdir,
-      overwrite = TRUE)
+    BPCells::write_matrix_dir(
+      mat = mat, outs5matdir,
+      overwrite = TRUE
+    )
     mat <- BPCells::open_matrix_dir(outs5matdir)
+  } else {
+    mat <- as(object = mat, Class = "dgCMatrix")
   }
   s5 <- Seurat::CreateSeuratObject(counts = mat,
     meta.data = ann$obs)

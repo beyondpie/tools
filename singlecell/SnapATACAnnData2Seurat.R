@@ -2,9 +2,10 @@
 Sys.setenv("_R_USE_PIPEBIND_" = TRUE)
 # use for transpose of sparse matrix.
 library(Matrix)
-import::from(.from = optparse,
-  OptionParser, add_option, parse_args)
-import::from(.from = stringr, str_glue)
+library(Seurat)
+library(BPCells)
+library(optparse)
+library(tidyverse)
 
 # * set up arguments
 args <- OptionParser(usage = "Transform SnapATAC2 AnnData to Seurat v5 R object.",
@@ -66,10 +67,10 @@ args <- OptionParser(usage = "Transform SnapATAC2 AnnData to Seurat v5 R object.
   parse_args(object = _)
 
 ## # * DEBUG
-## datadir <- file.path("/projects/ps-renlab2/szu/projects",
+## datadir <- file.path("/tscc/projects/ps-renlab2/szu/projects",
 ##   "amb_pairedtag", "03.integration", "src/test/resource")
 ## args$sa2fnm <- file.path(datadir, "sa2ann_test.h5ad")
-## args$outfnm <- datadir
+## args$outfnm <- file.path(datadir, "sa2ann_test.seu.rds")
 ## args$sa2meta <- file.path(datadir, "sa2ann_cellmeta.csv")
 ## args$keycol <- "barcode"
 ## args$dscol <- "brainregion"
@@ -78,7 +79,7 @@ args <- OptionParser(usage = "Transform SnapATAC2 AnnData to Seurat v5 R object.
 ## args$downsample <- FALSE
 ## args$conda <- "~/miniforge3/bin/mamba"
 ## args$condaenv <- "sa2"
-## args$useBPCells <- TRUE
+## args$useBPCells <- FALSE
 
 # * functions
 getBarcodeFromAnn <- function(ann, backed = 'r') {
@@ -157,7 +158,12 @@ tos5 <- function(ann,
       x => `rownames<-`(x, x$barcode) |>
       x => x[colnames(mat), ]
   }
-  s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
+  if (saveAsBPCells) {
+    s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
+  } else {
+    s5 <- Seurat::CreateSeuratObject(
+      counts = as(object = mat, Class = "dgCMatrix"))
+  }
   message("Save Seurat to ", outfnm)
   saveRDS(s5, outfnm)
   message("Seurat object saved.")
