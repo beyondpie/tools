@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 Sys.setenv("_R_USE_PIPEBIND_" = TRUE)
-options(future.globals.maxSize = 5e9)
+options(future.globals.maxSize = 10e9)
 library(optparse)
 library(Matrix)
 library(Seurat)
