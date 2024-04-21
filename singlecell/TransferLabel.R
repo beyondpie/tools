@@ -6,6 +6,7 @@ library(optparse)
 library(Matrix)
 library(Seurat)
 library(tidyverse)
+library(BPCells)
 
 # * set up arguments
 args <- OptionParser(
@@ -55,6 +56,10 @@ args <- OptionParser(
     action = "store_true", default = FALSE
   ) |>
   add_option(
+    opt_str = c("--rerun"), type = "logical",
+    action = "store_true", default = FALSE
+  ) |>
+  add_option(
     opt_str = c("-m", "--method"), type = "character",
     default = "cca",
     help = "method for transfer label"
@@ -75,21 +80,21 @@ args <- OptionParser(
   parse_args(object = _)
 
 # * DEBUG
-## projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
-## datadir <- file.path(
-##   projdir, "03.integration", "src/test/resource"
-## )
-## args$ref <- file.path(datadir, "allen_ref.rds")
-## args$query <- file.path(datadir, "pt_query.rds")
-## args$tfcol <- "cl"
-## args$outdir <- datadir
-## args$useref <- TRUE
-## args$saveanchor <- TRUE
-## args$kanchor <- 50
-## args$method <- "cca"
-## args$feature <- file.path(
-##   projdir, "meta", "AIT21_k8_markers.txt"
-## )
+projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
+datadir <- file.path(
+  projdir, "03.integration", "src/test/resource"
+)
+args$ref <- file.path(datadir, "allenseu_ds.rds")
+args$query <- file.path(datadir, "ptseu_ds.rds")
+args$tfcol <- "cl"
+args$outdir <- datadir
+args$useref <- TRUE
+args$saveanchor <- TRUE
+args$kanchor <- 50
+args$method <- "cca"
+args$feature <- file.path(
+  projdir, "meta", "AIT21_k8_markers.txt"
+)
 
 # * set up inputs
 getNoZeroCountGene <- function(s5) {
@@ -167,7 +172,7 @@ VariableFeatures(query) <- features
 if (args$saveanchor) {
   anchorfnm <- file.path(args$outdir, "tf.anchors.rds")
 }
-if (file.exists(anchorfnm)) {
+if ((!args$rerun) && (file.exists(anchorfnm))) {
   message("Anchor file exist, and will load it.")
   anchors <- readRDS(anchorfnm)
 } else {
