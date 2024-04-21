@@ -75,32 +75,23 @@ args <- OptionParser(
   parse_args(object = _)
 
 # * DEBUG
-projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
-datadir <- file.path(
-  projdir, "03.integration", "src/test/resource"
-)
-args$ref <- file.path(datadir, "allen_ref.rds")
-args$query <- file.path(datadir, "pt_query.rds")
-args$tfcol <- "cl"
-args$outdir <- datadir
-args$useref <- TRUE
-args$saveanchor <- TRUE
-args$kanchor <- 50
-args$method <- "cca"
-args$feature <- file.path(
-  projdir, "meta", "AIT21_k8_markers.txt"
-)
+## projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
+## datadir <- file.path(
+##   projdir, "03.integration", "src/test/resource"
+## )
+## args$ref <- file.path(datadir, "allen_ref.rds")
+## args$query <- file.path(datadir, "pt_query.rds")
+## args$tfcol <- "cl"
+## args$outdir <- datadir
+## args$useref <- TRUE
+## args$saveanchor <- TRUE
+## args$kanchor <- 50
+## args$method <- "cca"
+## args$feature <- file.path(
+##   projdir, "meta", "AIT21_k8_markers.txt"
+## )
 
 # * set up inputs
-# pretty slow
-getVarGenes <- function(s5) {
-  m <- s5@assays$RNA@layers$counts
-  vapply(seq_len(nrow(m)), \(i) {
-    (max(m[i, ]) - min(m[i, ])) > eps
-  }, TRUE) |>
-    x => rownames(s5)[x]
-}
-
 getNoZeroCountGene <- function(s5) {
   m <- s5@assays$RNA@layers$counts
   rownames(s5)[rowSums(m) >= 1]
