@@ -7,6 +7,7 @@ library(Matrix)
 library(Seurat)
 library(tidyverse)
 library(BPCells)
+library(future)
 
 # * set up arguments
 args <- OptionParser(
@@ -70,6 +71,11 @@ args <- OptionParser(
     help = "kanchor for finding anchors"
   ) |>
   add_option(
+    opt_str = c("--threads"), type = "integer",
+    default = 4,
+    help = "threads to use"
+  ) |>
+  add_option(
     opt_str = c("-p", "--npca"), type = "integer",
     default = 50, help = "# of components for finding anchors"
   ) |>
@@ -95,6 +101,9 @@ args <- OptionParser(
 ## args$feature <- file.path(
 ##   projdir, "meta", "AIT21_k8_markers.txt"
 ## )
+
+message("threads: ", args$threads)
+plan("multicore", workers = args$threads)
 
 # * set up inputs
 getNoZeroCountGene <- function(s5) {
