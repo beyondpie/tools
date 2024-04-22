@@ -131,7 +131,7 @@ tos5 <- function(ann,
     }
   }
   outdir <- dirname(outfnm)
-  dir.create(outdir, showWarnings = FALSE)
+  dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
   message("Transform snapatac2 anndaata to Seurat",
     " with MatrixExtra package.")
   message("Treat X from ann as count, and force it to integer.")

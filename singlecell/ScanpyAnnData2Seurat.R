@@ -81,7 +81,7 @@ tos5 <- function(ann,
   barcode_ann <- ann$obs_names$to_list()
   features_ann <- ann$var_names$to_list()
   outdir <- dirname(outfnm)
-  dir.create(outdir, showWarnings = FALSE)
+  dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
   message("Transform snapatac2 anndaata to Seurat",
     " with MatrixExtra package.")
   message("Treat ", matGroup,
