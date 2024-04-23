@@ -14,29 +14,30 @@ args <- OptionParser("Iteratively merging peaks from peak summit.
 ") |>
   add_option(
     opt_str = c("-i", "--input"),
-    type = "character", help = "One file with multiple peak summit bed files"
+    type = "character",
+    help = "each line: GroupName\tPeakSummitBedName"
   ) |>
   add_option(
     opt_str = c("-g", "--genome"),
     type = "character", help = "genoem, default is mm10",
     default = "mm10"
   ) |>
-  add_option(opt_str(c("-e", "--extend")),
+  add_option(c("-e", "--extend"),
     type = "integer", default = 500,
     help = "extend bp length, default 500"
   ) |>
-  add_option(opt_str(c("--blacklist")),
+  add_option(c("--blacklist"),
     type = "character", default = NULL,
     help = "blacklist bed file, default NULL"
   ) |>
-  add_option(opt_str(c("--chromSize")),
+  add_option(c("--chromSize"),
     type = "character", default = NULL,
     help = "chrom size file, default NULL"
   ) |>
-  add_option(opt_str(c("-o", "--out")),
+  add_option(c("-o", "--out"),
     type = "character", help = "out union peak bed fnm."
   ) |>
-  add_option(opt_str(c("--ncpu")),
+  add_option(c("--ncpu"),
     type = "integer",
     default = 4, help = "ncpu for parallel"
   ) |>
@@ -241,7 +242,7 @@ dir.create(dirname(args$out), recursive = TRUE,
   showWarnings = FALSE)
 message("save union peak set to: ", args$out)
 fwrite(outUnion,
-  file = outfname,
+  file = args$out,
   sep = "\t", quote = FALSE, col.names = TRUE, row.names = FALSE
 )
 message("Done.")
