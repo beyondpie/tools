@@ -16,7 +16,7 @@ args <- OptionParser(
  NOTE:
  - R version >= 4.2
  - Seurat version >= 5.0
- - Methods:cca (rpca and harmony not yet)
+ - Methods: as listed in Seurat::FindTransferAnchors
 
  Usage examples
  0. Get help
@@ -86,7 +86,8 @@ args <- OptionParser(
   parse_args(object = _)
 
 # * DEBUG
-## projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
+# projdir <- "/tscc/projects/ps-renlab2/szu/projects/amb_pairedtag"
+## projdir <- "/projects/ps-renlab2/szu/projects/amb_pairedtag"
 ## datadir <- file.path(
 ##   projdir, "03.integration", "src/test/resource"
 ## )
@@ -97,7 +98,7 @@ args <- OptionParser(
 ## args$useref <- TRUE
 ## args$saveanchor <- TRUE
 ## args$kanchor <- 50
-## args$method <- "cca"
+## args$method <- "pcaproject"
 ## args$feature <- file.path(
 ##   projdir, "meta", "AIT21_k8_markers.txt"
 ## )
@@ -126,9 +127,9 @@ genes_query_var <- getNoZeroCountGene(query)
 genes_all <- intersect(genes_ref_var, genes_query_var)
 message(str_glue("{length(genes_all)} genes from both."))
 ref <- ref[genes_all, ] |>
-  Seurat::NormalizeData(object = _)
+  NormalizeData(object = _)
 query <- query[genes_all, ] |>
-  Seurat::NormalizeData(object = _)
+  NormalizeData(object = _)
 
 message("prepare outdir.")
 dir.create(args$outdir, showWarnings = FALSE)
@@ -179,15 +180,13 @@ VariableFeatures(query) <- features
 
 # * set up anchor process
 if (args$saveanchor) {
-  anchorfnm <- file.path(args$outdir, "tf.anchors.rds")
+  anchorfnm <- file.path(args$outdir,
+    str_glue("tf.anchors.with-{args$method}-kac{args$kanchor}.rds"))
 }
 if ((!args$rerun) && (file.exists(anchorfnm))) {
   message("Anchor file exist, and will load it.")
   anchors <- readRDS(anchorfnm)
 } else {
-  if (args$method != "cca") {
-    stop(str_glue("{args$method} has been supported yet."))
-  }
   message(str_glue("FindTransferAnchors with {args$method} method."))
   anchors <- FindTransferAnchors(
     reference = ref,
@@ -225,7 +224,7 @@ message("Transferred labels are written into query.")
 
 queryfnm <- file.path(
   args$outdir,
-  str_glue("query.with.tf-{args$method}_on-{args$tfcol}.rds")
+  str_glue("query.with.tf-{args$method}-kac{args$kanchor}_on-{args$tfcol}.rds")
 )
 message(
   "Save query object with tflabels to: ",
