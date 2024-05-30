@@ -15,6 +15,7 @@ args <- OptionParser(usage = "Transform SnapATAC2 AnnData to Seurat v5 R object.
  - R version >= 4.0
  - Seurat version >= 5.0
  - SnapATAC2 >= 2.4
+ - cellmeta file is needed
 
  Usage examples
  0. Get help
