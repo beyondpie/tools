@@ -117,6 +117,7 @@ checkMeta <- function(ann, meta, backed = 'r') {
   }
   return(r)
 }
+
 tos5 <- function(ann,
                  outfnm,
                  backed = 'r',
@@ -149,6 +150,8 @@ tos5 <- function(ann,
     BPCells::write_matrix_dir(mat = mat, outs5matdir,
       overwrite = TRUE)
     mat <- BPCells::open_matrix_dir(outs5matdir)
+  } else {
+    mat <- as(object = mat, Class = "dgCMatrix")
   }
   ann_meta <- ann$obs |>
     x => `rownames<-`(x, colnames(mat))
@@ -158,12 +161,7 @@ tos5 <- function(ann,
       x => `rownames<-`(x, x$barcode) |>
       x => x[colnames(mat), ]
   }
-  if (saveAsBPCells) {
-    s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
-  } else {
-    s5 <- Seurat::CreateSeuratObject(
-      counts = as(object = mat, Class = "dgCMatrix"))
-  }
+  s5 <- Seurat::CreateSeuratObject(counts = mat, meta.data = ann_meta)
   message("Save Seurat to ", outfnm)
   saveRDS(s5, outfnm)
   message("Seurat object saved.")
