@@ -1,0 +1,4 @@
+* Non-negative matrix factorization
+
+Modify Yang Li's nmf-related scripts, which he used them for the
+snATAC-seq analysis in the adult cerebral region (Li et al., Nature 2021).
