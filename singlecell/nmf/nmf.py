@@ -1,4 +1,9 @@
 """
+Non-negative matrix factorization (NMF)
+
+Original Author: Yang Eric Li
+Updated by: Songpeng Zu
+
 Modify Yang's nmfATAC.cluster2peak.lite.py
 - remove the unused inputs for xgi and ygi
 - remove the unused method lda

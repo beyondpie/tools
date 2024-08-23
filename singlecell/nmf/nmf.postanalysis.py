@@ -1,6 +1,9 @@
 """
-After running nmf independently, we read the results and summize them
-based on Yang's nmf script.
+After running nmf independently, we read the results and summize them.
+
+Original Author: Yang Eric Li.
+
+Updated by: Songpeng Zu
 """
 
 import argparse
