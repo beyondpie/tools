@@ -6,7 +6,16 @@ Updated by: Songpeng Zu
 Updated time: 2024-08-23
 """
 
+from warnings import warn
+from os.path import exists, basename
+import numpy as np
+from scipy.cluster.hierarchy import linkage, leaves_list
+from scipy.spatial.distance import squareform
+from time import perf_counter as pc
+import matplotlib.pyplot as plt
 import argparse
+import itertools
+import math
 
 parser = argparse.ArgumentParser(description="Run NMF using sklearn.")
 parser.add_argument("-i", "--inputPrefix", type=str, dest="input_prefix")
@@ -18,26 +27,11 @@ parser.add_argument("-o", "--outPrefix", type=str, dest="out_prefix")
 
 args = parser.parse_args()
 
-from warnings import warn
-from os.path import exists, basename
-import numpy as np
-from scipy import io
-from scipy.cluster.hierarchy import linkage, leaves_list, cophenet
-from scipy.spatial.distance import squareform
-from scipy.sparse import save_npz, load_npz
-from sklearn.decomposition import NMF
-import fastcluster as fc
-from time import perf_counter as pc
-import matplotlib.pyplot as plt
-
 plt.switch_backend("agg")
 try:
     from matplotlib.pyplot import imshow, set_cmap
-except ImportError as exc:
+except ImportError:
     warn("Matplotlib must be installed.")
-
-import itertools
-import math
 
 
 def saveC(prefix, X):
