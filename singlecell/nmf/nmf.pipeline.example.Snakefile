@@ -64,7 +64,7 @@ rule nmf:
         expand("{d}/nmf.{{r}}.{{n}}.log", d = log_dir)
     shell:
         """
-        {python_bin} {code_dir}/python/02.nmf.py -p {input} \
+        {python_bin} nmf.py -p {input} \
             -r {wildcards.r} -n {wildcards.n} \
             -o {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{wildcards.n} \
             2> {log}
@@ -80,7 +80,7 @@ rule post_nmf:
         expand("{d}/nmf.{{r}}.post_nmf.log", d = log_dir)
     shell:
         """
-        {python_bin} {code_dir}/python/02.post_nmf.py \
+        {python_bin} nmf.post_analysis.py \
            -r {wildcards.r} \
            -i {nmf_dir}/nmfPmat.{tag} \
            -o {nmf_dir}/nmfPmat.{tag} \
@@ -99,15 +99,15 @@ rule stat:
         expand("{d}/nmf.{{r}}.stat.log", d = log_dir)
     shell:
         """
-        {Rscript_bin} {code_dir}/R/02.nmfATAC.plotH.R \
+        {Rscript_bin} nmf.plotH.R \
             -i {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index}.H.mx \
            -o {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index} 2> {log}
         
-        {Rscript_bin} {code_dir}/R/02.nmfATAC.plotW.R \
+        {Rscript_bin} nmf.plotW.R \
             -i {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index}.W.mx  \
            --output {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index} 2> {log}
         
-        {python_bin} {code_dir}/python/02.nmfATAC.stat.py -p {input.mat} \
+        {python_bin} nm.stat.py -p {input.mat} \
            -x {input.peak} -y {input.cluster} \
            --basis {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index}.W.mx \
            --coef {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index}.H.mx \
@@ -115,7 +115,7 @@ rule stat:
            -o {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index} 2> {log}
         
         ## How can we remove the >>
-        {Rscript_bin} {code_dir}/R/02.nmfATAC.statBox.R \
+        {Rscript_bin} nm.statBox.R \
            -i {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index}.statH \
            -o {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.n{min_index} \
            >> {nmf_dir}/nmfPmat.{tag}.r{wildcards.r}.sta.txt
@@ -130,7 +130,7 @@ rule sumNMF:
         f"{log_dir}/nmf.sum.log"
     shell:
         """
-        {Rscript_bin} {code_dir}/R/03.sumnmf.R \
+        {Rscript_bin} nmf.entropy_sparse.R \
              --nmfDir {nmf_dir} --tag {tag}  2> {log}
         """
         
@@ -143,7 +143,7 @@ rule plotNMF:
         expand("{d}/nmf.{{r}}.plot.log", d = log_dir)
     shell:
         """
-        {Rscript_bin} {code_dir}/R/04.nmf.plot.R --nmfDir {nmf_dir} \
+        {Rscript_bin} nmf.heatmap.R --nmfDir {nmf_dir} \
             --module {wildcards.r} \
             --tag {tag} 2> {log}
         """
