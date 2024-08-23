@@ -1,42 +1,22 @@
+# Draw Heatmap of NMF.
 library(optparse)
 
-packdir <- file.path(here::here(), "package/R")
-import::from(
-  .from = "utils.R",
-  .directory = packdir,
-  checkArgsExistOrStop, prepareOutdir,
-  checkFileExistOrStop, colFn,
-  fastread.csv)
-import::from(.from = "cembav2env.R",
-  .directory = packdir, cembav2env, Sa2PeakCalling)
-import::from(
-  .from = "hc.R",
-  .directory = packdir,
-  getNMFHeatMap)
-import::from(
-  .from = "annot.R",
-  .directory = packdir,
-  getSubclassMeta.ordered)
-import::from(
-  .from = "peak.R",
-  .directory = packdir,
-  loadStatPeak.NMF,
-  processCPM.log2.scale.cap,
-  downsample.index.1,
-  downsampleStatPeak.1,
-  orderModules.cpm.statPeak,
-  orderStatPeakByModuleRank,
-  getPeakModuleAvgScore.NMF)
-
 op <- list(
+  make_option(c("--peakBed"), type = "character"),
+  make_option(c("--clusterOrd"), type = "character"),
+  make_option(c("--cpmPeakByCluster"), type = "character"),
   make_option(c("--nmfDir"), type = "character",
     default = "nmf_ppdc/out"),
-  make_option(c("--module"), type = "integer", default = 54),
+  make_option(c("--module"), type = "integer", default = 150),
   make_option(c("--tag"), type = "character", default = "ppdc")
 )
 args <- parse_args(OptionParser(option_list = op))
-checkArgsExistOrStop(args)
 
+invisible(lapply(names(args), function(v) {
+  if (is.null(args[[v]])) {
+    stop("Args have no attribute ", v)
+  }
+}))
 if (!dir.exists(args$nmfDir)) {
   stop(args$nmfDir, " does not exist.")
 }
@@ -50,27 +30,188 @@ statPeakFile <- file.path(
   args$nmfDir,
   paste("nmfPmat", tag, paste0("r", module),
     "n0.statW", sep = "."))
-if(!file.exists(statPeakFile)) {
-  stop(statPeakFile, " does not exist.")
-}
+peakBed <- args$peakBed
+clusterOrd <- args$clusterOrd
+cpmPeakByCluster <- args$cpmPeakByCluster
 
-peaks <- data.table::fread(Sa2PeakCalling$finalpeakBedFile,
+invisible(
+  lapply(c(statPeakFile, peakBed, clusterOrd, cpmPeakByCluster), \(f){
+  if (!file.exists(f)) {
+    stop(f, " does not exist.")
+  }
+}))
+
+peaks <- data.table::fread(peakBed,
   header = FALSE, sep = "\t", data.table = FALSE)
 colnames(peaks) <- c("chrom", "start", "end", "name")
 peakCoords <- with(peaks,
   paste(chrom, paste(start, end, sep = "-"), sep = ":"))
 names(peakCoords) <- peaks$name
 
+# * functions
+getPeakModuleAvgScore.NMF <- function(cpm, moduleOfPeak,
+                                      fn = rowMeans) {
+  modules <- unique(moduleOfPeak)
+  avgScores <- vapply(modules, function(m) {
+    a <- cpm[, moduleOfPeak %in% m, drop = FALSE]
+    return(fn(a))
+  }, FUN.VALUE = rep(0, nrow(cpm)))
+  return(avgScores)
+}
+
+getTopRankClusterForPeakModule <- function(cluster2moduleScore,
+                                           modules = colnames(cluster2moduleScore),
+                                           topk = 3) {
+  n_module <- ncol(cluster2moduleScore)
+  r <- vapply(seq_len(n_module), function(i){
+    return(
+      order(cluster2moduleScore[, i], decreasing = TRUE)[1:topk]
+    )
+  },FUN.VALUE = rep(1, topk))
+  if(topk < 2) {
+    r <- matrix(data = r, nrow = 1)
+  }
+  colnames(r) <- modules
+  return(r)
+}
+
+rankModules <- function(topRank.module,
+                        modules = colnames(topRank.module),
+                        avg.fn = colMeans) {
+  avgRank <- avg.fn(topRank.module)
+  index.order <- order(avgRank, decreasing = FALSE)
+  return(modules[index.order])
+}
+
+colFn <- function(col.fn = min) {
+  a <- function(mat) {
+    apply(mat, 2, col.fn)
+  }
+  return(a)
+}
+
+orderModules.cpm.statPeak <- function(cpm, statPeak,
+                                      fn.avgModule = rowMeans,
+                                      topk = 1,
+                                      fn.rank = min) {
+  moduleOfPeak <- statPeak$module
+  cluster2moduleScore <- getPeakModuleAvgScore.NMF(
+    cpm = cpm,
+    moduleOfPeak = moduleOfPeak,
+    fn = fn.avgModule)
+  topRank.module <- getTopRankClusterForPeakModule(
+    cluster2moduleScore = cluster2moduleScore,
+    modules = colnames(cluster2moduleScore),
+    topk = topk
+  )
+  colMins <- colFn(col.fn = fn.rank)
+  modules.order <- rankModules(
+    topRank.module,
+    modules = colnames(topRank.module),
+    avg.fn = colMins)
+  return(modules.order)
+}
+
+orderStatPeakByModuleRank <- function(statPeak, mod.ordered){
+  index.list <- lapply(mod.ordered, function(m) {
+    index.raw <- which(statPeak$moduleN %in% m)
+    index <- index.raw[
+      order(statPeak$featureScore[index.raw], decreasing = TRUE)]
+    return(index)
+  })
+  index.ordered <- unlist(index.list)
+  r <- statPeak[index.ordered, ]
+  return(r)
+}
+
+downsample.index.1 <- function(index.all,
+                               mod.index,
+                               mod.ordered = NULL,
+                               score.index = NULL,
+                               size = 200,
+                               seed = 2022) {
+  set.seed(seed = seed)
+  mods <- if(!is.null(mod.ordered)) {
+    mod.ordered
+  } else {
+    unique(mod.index)
+  }
+  index.list <- lapply(mods, function(m) {
+    index <- mod.index %in% m
+    if(sum(index) < 1) {
+      warning("Module ", m, " has no features.")
+      return(NULL)
+    }
+    cols <- which(index)
+    cols.sampled <- if(!is.null(score.index)) {
+      cols[order(score.index[cols], decreasing = TRUE)][
+        seq_len(min(length(cols), size))
+      ]
+    } else {
+      sample(cols,size = min(length(cols), size),
+        replace = FALSE)
+    }
+    return(cols.sampled)
+  })
+  index.list[sapply(index.list, is.null)] <- NULL
+  return(unlist(index.list))
+ }
+
+downsampleStatPeak.1 <- function(statPeak,
+                                 mod.ordered = NULL,
+                                 size = 200,
+                                 seed = 2022) {
+  index.sampled <- downsample.index.1(
+    index.all = seq_len(nrow(statPeak)),
+    mod.index = statPeak$moduleN,
+    mod.ordered = mod.ordered,
+    score.index = statPeak$featureScore,
+    size = size,
+    seed = seed
+  )
+  statPeak.sampled <- statPeak[index.sampled, ]
+  return(statPeak.sampled)
+}
+
+getNMFHeatMap <- function(cpm.plot,
+                          ha_row = NULL,
+                          ha_col = NULL,
+                          showRowNames = TRUE,
+                          showColNames = FALSE,
+                          fontsize = 6,
+                          low.val.col = quantile(cpm.plot, 0.01),
+                          high.val.col = quantile(cpm.plot, 0.99),
+                          use_raster = TRUE,
+                          legend_title = "log2 of CPM",
+                          legend_labels = c("Low", "High")) {
+  col_fun <- circlize::colorRamp2(
+    seq(low.val.col, high.val.col, length = 60),
+    viridis::viridis(60)
+  )
+  p <- ComplexHeatmap::Heatmap(
+    matrix = cpm.plot,
+    col = col_fun,
+    cluster_columns = FALSE,
+    cluster_rows = FALSE,
+    show_row_names = showRowNames,
+    row_names_gp = grid::gpar(fontsize = fontsize),
+    show_column_names = showColNames,
+    top_annotation = ha_col,
+    left_annotation = ha_row,
+    use_raster = use_raster,
+    show_heatmap_legend = TRUE,
+    heatmap_legend_param = list(
+      title = legend_title,
+      at = c(low.val.col, high.val.col),
+      labels = legend_labels)
+  )
+  return(p)
+}
+
+# ============== Main ================
 # * load subclass order and colors
-## subclassMeta <- readRDS(file.path(here::here(), "figures",
-##   "subclassIntL3.hc.meta.rds"))
-
-## hc <- subclassMeta[[4]]$hc
-## cluster.order.hc <- hc$labels[hc$order]
-
-# TODO: hardcode
 cluster.order.hc <- data.table::fread(
-  file = file.path(projdir, "20.nmf", "data", "sa2.subclass.srt.txt"),
+  file = clusterOrd,
   header = FALSE, data.table = FALSE)$V1
 
 ## TODO: update
@@ -88,26 +229,21 @@ statPeak.ds <- downsampleStatPeak.1(
   seed = 2022)
 
 # * load cpm
-## TODO: hardcode
-cpm_pbysc <- fastread.csv(
-  fnm = file.path(projdir, "18.snap2_peakcalling",
-    "out/scfilter",
-    "cpm_peakBysubclass.csv"))
-cpm <- t(as.matrix(cpm_pbysc))
-rownames(cpm) <- colnames(cpm_pbysc)
-colnames(cpm) <- rownames(cpm_pbysc)
+r <- data.table::fread(
+  file = cpmPeakByCluster, sep = ",", header = TRUE, data.table = FALSE)
+rownames(r) <- r$V1
+r$V1 <- NULL
+cpm <- t(as.matrix(r))
+rownames(cpm) <- colnames(r)
+colnames(cpm) <- rownames(r)
 
-cpm.log2 <- processCPM.log2.scale.cap(
-  cpm = cpm,
-  islog2 = TRUE,
-  isScale = FALSE,
-  isCapped = FALSE)
-cpm.plot <- cpm.log2[
-  cluster.order.hc, peakCoords[statPeak.ds$peak]]
+logcpm <- log1p(cpm) |>
+  scale(x = _, center = TRUE, scale = TRUE) |>
+  x => x[cluster.order.hc, peakCoords[statPeak.ds$peak]]
 
 # * set module order
 nmf.order <- orderModules.cpm.statPeak(
-  cpm = cpm.plot,
+  cpm = logcpm,
   statPeak = statPeak.ds)
 
 # * re-order statPeak
@@ -118,21 +254,21 @@ statPeak.ordered <- orderStatPeakByModuleRank(
 # * reorder peaks by putting the global modules firstly
 modules <- unique(statPeak.ordered$moduleN)
 cpm.mod <- getPeakModuleAvgScore.NMF(
-  cpm = cpm.plot,
+  cpm = logcpm,
   moduleOfPeak = statPeak.ordered$moduleN,
   fn = rowMeans
 )
-high.value <- quantile(cpm.plot, 0.95)
+high.value <- quantile(logcpm, 0.95)
 nsubclass.peak.plot <- colSums(cpm.mod >= high.value)
-global_modules<- colnames(cpm.mod)[
-  which(nsubclass.peak.plot >= (0.9 * nrow(cpm.plot)))]
+global_modules <- colnames(cpm.mod)[
+  which(nsubclass.peak.plot >= (0.9 * nrow(logcpm)))]
 mod.reorder <- c(
   global_modules, setdiff(colnames(cpm.mod), global_modules)
 )
 statPeak.reorder <- orderStatPeakByModuleRank(
   statPeak.ordered, mod.reorder
 )
-cpm.plot.reorder <- cpm.plot[ , peakCoords[statPeak.reorder$peak]]
+cpm.plot.reorder <- logcpm[, peakCoords[statPeak.reorder$peak]]
 
 # * set heatmap column annotation
 moduleColor <- grDevices::colorRampPalette(
@@ -150,19 +286,21 @@ ha_col <- ComplexHeatmap::HeatmapAnnotation(
 
 # * get heatmap
 p.cpm.log2 <- getNMFHeatMap(
-  cpm.plot = cpm.plot.reorder,
+  logcpm = cpm.plot.reorder,
   ## NOTE: update later
   ha_row = NULL,
   ha_col = ha_col,
   fontsize = 6,
-  low.val.col = quantile(cpm.plot, 0.01),
-  high.val.col = quantile(cpm.plot, 0.99))
+  low.val.col = quantile(logcpm, 0.01),
+  high.val.col = quantile(logcpm, 0.99))
 
 # * plot figures
+figfnm <- file.path(args$nmfDir,
+    paste(tag, paste0("r", module), "pdf", sep = "."))
 withr::with_pdf(
-  new = file.path(args$nmfDir,
-    paste(tag, paste0("r", module), "pdf", sep = ".")),
+  new = figfnm,
   code = {
     print(p.cpm.log2)
   }, height = 28, width = 20
 )
+message("plot figure done: ", fignm)
