@@ -34,8 +34,7 @@ parser.add_argument(
 
 parser.add_argument("-r", "--rank", type=int, dest="rank", help="an integer for rank ")
 parser.add_argument(
-    "-n", "--n_run", type=int, dest="n_run", default=1, help="an integer for # of runs "
-)
+    "-n", "--seed", type=int, dest="seed", default=1)
 parser.add_argument(
     "-o", "--outPrefix", type=str, dest="outPrefix", help="output prefix"
 )
@@ -97,7 +96,7 @@ if __name__ == "__main__":
     """Run standard NMF on rank"""
     outPrefix = args.outPrefix
     rank = args.rank
-    n = args.n_run
+    n = args.seed
     start_time = pc()
     if args.inputF is not None:
         print(f"Loading mat from npz file {args.inputF}.")
