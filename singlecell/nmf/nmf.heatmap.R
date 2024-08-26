@@ -1,49 +1,58 @@
 # Draw Heatmap of NMF.
 library(optparse)
+library(ComplexHeatmap)
 
 op <- list(
-  make_option(c("--cpmCByPH5"), type = "character"),
-  make_option(c("--nmfDir"), type = "character",
-    default = "nmf_ppdc/out"),
+  make_option(c("--cpmCbyPh5"), type = "character"),
+  make_option(c("--peakStatWfnm"), type = "character"),
+  make_option(c("--figd"), type = "character"),
   make_option(c("--module"), type = "integer", default = 150),
   make_option(c("--tag"), type = "character", default = "ppdc")
 )
 args <- parse_args(OptionParser(option_list = op))
 
 # debug
-args$peakNamefnm <- file.path(
-  "/projects/ps-renlab2/szu/projects/amb_pairedtag",
-  "data/ptHistoneCounts/ATACPeak_rds",
-  "peak.sc.H3K27ac.txt"
-)
+## args$cpmCbyPh5 <- file.path(
+##   "/projects/ps-renlab2/szu/projects/amb_pairedtag/",
+##   "data/ptHistoneCounts/ATACPeak_rds",
+##   "cpm.scbyp.H3K27ac.h5"
+## )
+## args$peakStatWfnm <- file.path(
+##   "/projects/ps-renlab2/szu/projects/amb_pairedtag/",
+##   "05.CRE/out/nmf",
+##   "nmfPmat.H3K27ac.r150.n0.statW"
+## )
+## args$figd <- file.path(
+##   "/projects/ps-renlab2/szu/projects/amb_pairedtag",
+##   "05.CRE/out/nmf"
+## )
+## args$module <- 150
+## args$tag <- "H3K27ac"
 
-args$clusterOrd <- file.path(
-  "/projects/ps-renlab2/szu/projects/amb_pairedtag",
-  "data/ptHistoneCounts/ATACPeak_rds",
-  "subclass.H3K27ac.txt"
-)
-
-args$nmfDir <- file.path(
-  "/projects/ps-renlab2/szu/projects/amb_pairedtag",
-  "05.CRE/out/nmf"
-)
-
-args$module <- 150
-args$tag <- "H3K27ac"
 
 # * configs
 module <- args$module
 tag <- args$tag
-
-statPeakFile <- file.path(
-  args$nmfDir,
-  paste("nmfPmat", tag, paste0("r", module),
-    "n0.statW", sep = "."))
+statPeakFile <- args$peakStatWfnm
 peakBed <- args$peakBed
 clusterOrd <- args$clusterOrd
-cpmPeakByCluster <- args$cpmPeakByCluster
+cpmPeakByCluster <- args$cpmCbyPh5
 
 # * functions
+loadStatPeakNMF <- function(fnm) {
+  statPeak <- data.table::fread(
+    file = fnm,
+    header = FALSE, sep = "\t", data.table = FALSE
+  )
+  colnames(statPeak) <- c(
+    "peak", "index", "class0", "contributes",
+    "featureScore", "selt_fs_list",
+    "selt_med_list")
+  statPeak$moduleN <- paste(
+    "m", as.integer(statPeak$class0 + 1), sep = "")
+  rownames(statPeak) <- statPeak$peak
+  return(statPeak)
+}
 getPeakModuleAvgScore.NMF <- function(cpm, moduleOfPeak,
                                       fn = rowMeans) {
   modules <- unique(moduleOfPeak)
@@ -177,7 +186,7 @@ getNMFHeatMap <- function(cpm.plot,
                           low.val.col = quantile(cpm.plot, 0.01),
                           high.val.col = quantile(cpm.plot, 0.99),
                           use_raster = TRUE,
-                          legend_title = "log2 of CPM",
+                          legend_title = "log of CPM",
                           legend_labels = c("Low", "High")) {
   col_fun <- circlize::colorRamp2(
     seq(low.val.col, high.val.col, length = 60),
@@ -205,16 +214,18 @@ getNMFHeatMap <- function(cpm.plot,
 
 # ============== Main ================
 # * load cpm, subclass order and colors
-fh5 <- hdf5r::H5File$new(f, mode = "r")
+fh5 <- hdf5r::H5File$new(cpmPeakByCluster, mode = "r")
 cpm <- fh5[["X/mat"]][,]
 peakCoords <- fh5[["X/colnames"]][]
 cluster.order.hc <- fh5[["X/rownames"]][]
+rownames(cpm) <- cluster.order.hc
+colnames(cpm) <- peakCoords
 
 ## TODO: update
 ha_row <- NULL
 
 # * load nmf result
-statPeak <- loadStatPeak.NMF(file = statPeakFile)
+statPeak <- loadStatPeakNMF(statPeakFile)
 n_total <- 10000
 n_module <- length(unique(statPeak$moduleN))
 n_avg <- floor(n_total / n_module)
@@ -222,11 +233,11 @@ statPeak.ds <- downsampleStatPeak.1(
   statPeak = statPeak,
   mod.ordered = NULL,
   size = n_avg,
-  seed = 2022)
+  seed = 2024)
 
+# scale(x = _, center = TRUE, scale = TRUE) |>
 logcpm <- log1p(cpm) |>
-  scale(x = _, center = TRUE, scale = TRUE) |>
-  x => x[cluster.order.hc, peakCoords[statPeak.ds$peak]]
+  x => x[, statPeak.ds$peak]
 
 # * set module order
 nmf.order <- orderModules.cpm.statPeak(
@@ -242,25 +253,27 @@ statPeak.ordered <- orderStatPeakByModuleRank(
 modules <- unique(statPeak.ordered$moduleN)
 cpm.mod <- getPeakModuleAvgScore.NMF(
   cpm = logcpm,
-  moduleOfPeak = statPeak.ordered$moduleN,
+  moduleOfPeak = statPeak.ds$moduleN,
   fn = rowMeans
 )
 high.value <- quantile(logcpm, 0.95)
 nsubclass.peak.plot <- colSums(cpm.mod >= high.value)
 global_modules <- colnames(cpm.mod)[
-  which(nsubclass.peak.plot >= (0.9 * nrow(logcpm)))]
+   which(nsubclass.peak.plot >= (0.7 * nrow(logcpm)))]
 mod.reorder <- c(
-  global_modules, setdiff(colnames(cpm.mod), global_modules)
+  global_modules, setdiff(nmf.order, global_modules)
 )
 statPeak.reorder <- orderStatPeakByModuleRank(
   statPeak.ordered, mod.reorder
 )
-cpm.plot.reorder <- logcpm[, peakCoords[statPeak.reorder$peak]]
+
 
 # * set heatmap column annotation
 moduleColor <- grDevices::colorRampPalette(
-  colors = c("bisque", "burlywood4"))(length(mod.reorder))
-names(moduleColor) <- nmf.order
+  colors = c("bisque", "burlywood4") )(
+    length(mod.reorder)) |>
+    setNames(object = _, mod.reorder)
+
 ha_col <- ComplexHeatmap::HeatmapAnnotation(
   Module = statPeak.reorder$moduleN,
   FeatureScore = ComplexHeatmap::anno_barplot(
@@ -273,7 +286,7 @@ ha_col <- ComplexHeatmap::HeatmapAnnotation(
 
 # * get heatmap
 p.cpm.log2 <- getNMFHeatMap(
-  logcpm = cpm.plot.reorder,
+  cpm.plot = logcpm[ , statPeak.reorder$peak],
   ## NOTE: update later
   ha_row = NULL,
   ha_col = ha_col,
@@ -282,7 +295,7 @@ p.cpm.log2 <- getNMFHeatMap(
   high.val.col = quantile(logcpm, 0.99))
 
 # * plot figures
-figfnm <- file.path(args$nmfDir,
+figfnm <- file.path(args$figd,
     paste(tag, paste0("r", module), "pdf", sep = "."))
 withr::with_pdf(
   new = figfnm,
@@ -290,4 +303,13 @@ withr::with_pdf(
     print(p.cpm.log2)
   }, height = 28, width = 20
 )
-message("plot figure done: ", fignm)
+message("plot figure done: ", figfnm)
+
+# * save meta data
+saveRDS(
+  object = list(logCPM4plot = logcpm[ , statPeak.reorder$peak],
+    nmfModule4plot = statPeak.reorder
+  ),
+  file = file.path(args$figd,
+    paste(tag, paste0("r", module), "meta.rds", sep = "."))
+)
