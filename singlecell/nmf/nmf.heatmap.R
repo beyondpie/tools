@@ -2,9 +2,7 @@
 library(optparse)
 
 op <- list(
-  make_option(c("--peakBed"), type = "character"),
-  make_option(c("--clusterOrd"), type = "character"),
-  make_option(c("--cpmPeakByCluster"), type = "character"),
+  make_option(c("--cpmCByPH5"), type = "character"),
   make_option(c("--nmfDir"), type = "character",
     default = "nmf_ppdc/out"),
   make_option(c("--module"), type = "integer", default = 150),
@@ -12,17 +10,28 @@ op <- list(
 )
 args <- parse_args(OptionParser(option_list = op))
 
-invisible(lapply(names(args), function(v) {
-  if (is.null(args[[v]])) {
-    stop("Args have no attribute ", v)
-  }
-}))
-if (!dir.exists(args$nmfDir)) {
-  stop(args$nmfDir, " does not exist.")
-}
+# debug
+args$peakNamefnm <- file.path(
+  "/projects/ps-renlab2/szu/projects/amb_pairedtag",
+  "data/ptHistoneCounts/ATACPeak_rds",
+  "peak.sc.H3K27ac.txt"
+)
+
+args$clusterOrd <- file.path(
+  "/projects/ps-renlab2/szu/projects/amb_pairedtag",
+  "data/ptHistoneCounts/ATACPeak_rds",
+  "subclass.H3K27ac.txt"
+)
+
+args$nmfDir <- file.path(
+  "/projects/ps-renlab2/szu/projects/amb_pairedtag",
+  "05.CRE/out/nmf"
+)
+
+args$module <- 150
+args$tag <- "H3K27ac"
 
 # * configs
-projdir <- here::here()
 module <- args$module
 tag <- args$tag
 
@@ -33,20 +42,6 @@ statPeakFile <- file.path(
 peakBed <- args$peakBed
 clusterOrd <- args$clusterOrd
 cpmPeakByCluster <- args$cpmPeakByCluster
-
-invisible(
-  lapply(c(statPeakFile, peakBed, clusterOrd, cpmPeakByCluster), \(f){
-  if (!file.exists(f)) {
-    stop(f, " does not exist.")
-  }
-}))
-
-peaks <- data.table::fread(peakBed,
-  header = FALSE, sep = "\t", data.table = FALSE)
-colnames(peaks) <- c("chrom", "start", "end", "name")
-peakCoords <- with(peaks,
-  paste(chrom, paste(start, end, sep = "-"), sep = ":"))
-names(peakCoords) <- peaks$name
 
 # * functions
 getPeakModuleAvgScore.NMF <- function(cpm, moduleOfPeak,
@@ -209,10 +204,11 @@ getNMFHeatMap <- function(cpm.plot,
 }
 
 # ============== Main ================
-# * load subclass order and colors
-cluster.order.hc <- data.table::fread(
-  file = clusterOrd,
-  header = FALSE, data.table = FALSE)$V1
+# * load cpm, subclass order and colors
+fh5 <- hdf5r::H5File$new(f, mode = "r")
+cpm <- fh5[["X/mat"]][,]
+peakCoords <- fh5[["X/colnames"]][]
+cluster.order.hc <- fh5[["X/rownames"]][]
 
 ## TODO: update
 ha_row <- NULL
@@ -227,15 +223,6 @@ statPeak.ds <- downsampleStatPeak.1(
   mod.ordered = NULL,
   size = n_avg,
   seed = 2022)
-
-# * load cpm
-r <- data.table::fread(
-  file = cpmPeakByCluster, sep = ",", header = TRUE, data.table = FALSE)
-rownames(r) <- r$V1
-r$V1 <- NULL
-cpm <- t(as.matrix(r))
-rownames(cpm) <- colnames(r)
-colnames(cpm) <- rownames(r)
 
 logcpm <- log1p(cpm) |>
   scale(x = _, center = TRUE, scale = TRUE) |>
