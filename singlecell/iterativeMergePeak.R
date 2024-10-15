@@ -10,7 +10,7 @@ library(BSgenome)
 library(future.apply)
 
 args <- OptionParser("Iteratively merging peaks from peak summit.
-   The medhos is from ArchR.
+   The method is from ArchR.
 ") |>
   add_option(
     opt_str = c("-i", "--input"),
@@ -41,13 +41,17 @@ args <- OptionParser("Iteratively merging peaks from peak summit.
     type = "integer",
     default = 4, help = "ncpu for parallel"
   ) |>
+  add_option(c("--normalize"), action = "store_true",
+    default = FALSE,
+    type = "logical",
+    help = "if need to noramlize the score") |>
   parse_args(object = _)
 
 plan(multicore, workers = args$ncpu)
 
 # read bed to gr
 read2gr <- function(bedF, label) {
-  df <- fread(bedF, sep = "\t", header = F)
+  df <- fread(bedF, header = F)
   colnames(df) <- c("chr", "start", "end", "name", "score")
   df$label <- label
   gr <- GRanges(
@@ -206,7 +210,7 @@ norm2spm <- function(gr, by = "score") {
 
 
 # load summit
-summitF <- read.table(args$input, sep = "\t", header = F)
+summitF <- read.table(args$input, header = F)
 label.lst <- as.character(summitF$V1)
 file.lst <- as.character(summitF$V2)
 
@@ -214,7 +218,12 @@ peak.list <- future_lapply(
   seq_along(file.lst), function(i) {
     message("working on summit set for... ", label.lst[i])
     p.gr <- read2gr(file.lst[i], label = label.lst[i])
-    p.gr <- extendSummit(p.gr, size = args$extend)
+    if (args$extend < 1) {
+      message("extend size is less than 1")
+      message("No extendsummit is perfomed.")
+    } else {
+      p.gr <- extendSummit(p.gr, size = args$extend)
+    }
     if (!is.null(args$blacklist)) {
       message("filter by blacklist: ", args$blacklist)
       p.gr <- filter4blacklist(p.gr, args$blacklist)
@@ -223,9 +232,15 @@ peak.list <- future_lapply(
       message("filter by chromSize: ", args$chromSize)
       p.gr <- filter4chrom(p.gr, args$chromSize)
     }
-    p.gr <- filter4N(p.gr, genome = args$genome)
-    p.gr <- nonOverlappingGR(p.gr, by = "score", decreasing = TRUE)
-    p.gr <- norm2spm(p.gr, by = "score")
+    # p.gr <- filter4N(p.gr, genome = args$genome)
+    # p.gr <- nonOverlappingGR(p.gr, by = "score", decreasing = TRUE)
+    if(args$normalize) {
+      message("perform normalization of score.")
+      p.gr <- norm2spm(p.gr, by = "score")
+    } else {
+      message("treat input score as spm directly.")
+      mcols(p.gr)$spm <- mcols(p.gr)[ , "score"]
+    }
     return(p.gr)
   }
 )
